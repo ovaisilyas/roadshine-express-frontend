@@ -1,0 +1,21 @@
+.hero-banner {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+.hero-slideshow {
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+.hero-slideshow img {
+  width: 100%;
+  height: auto;
+}
+
+.hero-banner:hover .hero-slideshow {
+  transform: translateX(-100%); /* Example slide transition */
+}
+
+  
