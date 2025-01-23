@@ -23,6 +23,8 @@ const SignInPage = ({ setUser }) => {
           localStorage.setItem("authToken", token);
           if(user.role === 'User'){
             navigate("/user");
+          } else if(user.role === 'Administrator'){
+            navigate("/admin");
           } else {
             // Redirect to the landing page
             navigate("/");

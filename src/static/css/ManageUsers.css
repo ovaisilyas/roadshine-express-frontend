@@ -1,0 +1,59 @@
+.manage-users {
+    padding: 20px;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .search-bar input {
+    padding: 10px;
+    width: 200px;
+    margin-right: 10px;
+  }
+
+  button {
+    padding: 10px 15px;
+    margin-left: 5px;
+    cursor: pointer;
+  }
+
+  .user-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .user-table th,
+  .user-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+
+  .user-table th {
+    background-color: #f4f4f4;
+    text-align: left;
+  }
+
+  .user-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .user-form label {
+    margin-bottom: 5px;
+  }
+
+  .user-form input,
+  .user-form select {
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+
+  .user-form button {
+    margin-right: 10px;
+  }

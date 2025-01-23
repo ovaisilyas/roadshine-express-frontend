@@ -1,0 +1,55 @@
+.manage-trucks {
+    padding: 20px;
+}
+
+.search-container {
+    margin-bottom: 10px;
+}
+
+.truck-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.truck-table th,
+.truck-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+.truck-table th {
+    background-color: #f4f4f4;
+    text-align: left;
+}
+
+.truck-form {
+    margin-top: 20px;
+}
+
+.truck-form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.truck-form input,
+    .truck-form select {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+.truck-form button {
+    margin-right: 10px;
+}
+
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+@media (max-width: 768px) {
+    .truck-table {
+        font-size: 12px;
+    }
+}
