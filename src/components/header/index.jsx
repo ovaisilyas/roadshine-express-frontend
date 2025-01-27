@@ -1,11 +1,15 @@
 import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
-import "../static/css/Header.css";
+import "../../static/css/Header.css";
+import { useUser } from "../../UserContext";
 
-const Header = ({ user, setUser }) => {
+const Header = () => {
+  const { user, setUser } = useUser();
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+
   const isAdmin = user?.role === "Administrator";
+  const isUser = user?.role === "User";
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
@@ -27,12 +31,17 @@ const Header = ({ user, setUser }) => {
       <nav>
         <ul className={`nav-links ${menuOpen ? "active" : ""}`}>
           <li onClick={() => navigate("/")}>Home</li>
+          {isUser && (
+            <>
+              <li onClick={() => navigate("/user")}>Place Order</li>
+            </>
+          )}
           {isAdmin && (
             <>
               <li onClick={() => navigate("/admin/manage-trucks")}>Manage Trucks</li>
               <li onClick={() => navigate("/admin/manage-users")}>Manage Users</li>
               <li onClick={() => navigate("/admin/manage-orders")}>Manage Orders</li>
-              <li onClick={() => navigate("/admin/invoicing")}>Invoicing</li>
+              <li onClick={() => navigate("/admin/invoice-list")}>Invoicing</li>
               <li onClick={() => navigate("/admin/reports")}>Reports</li>
             </>
           )}

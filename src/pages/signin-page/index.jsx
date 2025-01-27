@@ -1,20 +1,22 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import axios from "axios";
-import "../static/css/SignInPage.css";
+import Header from "../../components/header";
+import Footer from "../../components/footer";
+import "../../static/css/SignInPage.css";
+import { useUser } from "../../UserContext";
+import apiClient from "../../utils/ApiClient";
 
-const SignInPage = ({ setUser }) => {
+const SignInPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
+  const { setUser } = useUser();
 
   const handleSignIn = async (e) => {
     e.preventDefault();
     try {
-        const response = await axios.post("http://localhost:5000/api/users/signin", { email, password });
+        const response = await apiClient.post("/users/signin", { email, password });
         const { token, user } = response.data;
         if (response.data.token) {
           // Save the token in localStorage or a secure place

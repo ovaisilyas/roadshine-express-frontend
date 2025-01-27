@@ -1,13 +1,13 @@
 .about {
-    padding: 2rem;
+    padding: 20px;
     text-align: center;
   }
-  
+
   .about h2 {
     font-size: 2rem;
     margin-bottom: 1rem;
   }
-  
+
   .about p {
     font-size: 1.2rem;
     color: #555;
@@ -15,8 +15,7 @@
     margin: 0 auto;
     line-height: 1.6;
   }
-  
+
   main {
-    padding: 2rem;
+    padding: 20px;
   }
-  

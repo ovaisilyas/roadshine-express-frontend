@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import UserForm from "./UserForm";
-import Footer from "./Footer";
-import Header from "./Header";
-import "../static/css/ManageUsers.css";
+import UserForm from "../../components/user-form";
+import Footer from "../../components/footer";
+import Header from "../../components/header";
+import "../../static/css/ManageUsers.css";
+import apiClient from "../../utils/ApiClient";
 
 const ManageUsers = ({ user, setUser }) => {
   const [users, setUsers] = useState([]);
@@ -15,11 +15,9 @@ const ManageUsers = ({ user, setUser }) => {
     fetchUsers();
   }, []);
 
-  const baseURL = "http://localhost:5000";
-
   const fetchUsers = async () => {
     try {
-      const response = await axios.get(`${baseURL}/api/users`);
+      const response = await apiClient.get(`/users`);
       setUsers(response.data);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -42,7 +40,7 @@ const ManageUsers = ({ user, setUser }) => {
 
   const handleDeleteUser = async (id) => {
     try {
-      await axios.delete(`${baseURL}/api/users/${id}`);
+      await apiClient.delete(`/users/${id}`);
       setUsers(users.filter((user) => user.users_id !== id));
       alert("User deleted successfully!");
     } catch (error) {
@@ -55,7 +53,7 @@ const ManageUsers = ({ user, setUser }) => {
     if (editingUser) {
       // Update user
       try {
-        await axios.put(`${baseURL}/api/users/${currentUser.users_id}`, currentUser);
+        await apiClient.put(`/users/${currentUser.users_id}`, currentUser);
         setUsers(users.map((user) => (user.users_id === currentUser.users_id ? currentUser : user)));
         alert("User updated successfully!");
       } catch (error) {
@@ -65,7 +63,7 @@ const ManageUsers = ({ user, setUser }) => {
     } else {
       // Add user
       try {
-        await axios.post(`${baseURL}/api/users/`, currentUser);
+        await apiClient.post(`/users/`, currentUser);
         setUsers([...users, currentUser]);
         alert("User created successfully!");
       } catch (error) {

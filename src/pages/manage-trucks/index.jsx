@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import TruckForm from "./TruckForm";
-import Footer from "./Footer";
-import Header from "./Header";
-import "../static/css/ManageTrucks.css";
+import TruckForm from "../../components/truck-form";
+import Footer from "../../components/footer";
+import Header from "../../components/header";
+import "../../static/css/ManageTrucks.css";
+import apiClient from "../../utils/ApiClient";
 
 const ManageTrucks = ({ user, setUser }) => {
   const [trucks, setTrucks] = useState([]);
@@ -11,11 +11,9 @@ const ManageTrucks = ({ user, setUser }) => {
   const [showForm, setShowForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const baseURL = "http://localhost:5000";
-
   const fetchTrucks = async () => {
     try {
-      const response = await axios.get(`${baseURL}/api/trucks`);
+      const response = await apiClient.get(`/trucks`);
       setTrucks(response.data);
     } catch (error) {
       console.error("Error fetching trucks:", error);
@@ -29,7 +27,7 @@ const ManageTrucks = ({ user, setUser }) => {
   const handleFormSubmit = async (formData) => {
     if (editingTruck) {
         try {
-            await axios.put(`${baseURL}/api/trucks/${formData.truck_id}`, formData);
+            await apiClient.put(`/trucks/${formData.truck_id}`, formData);
             setTrucks(trucks.map((truck) => (truck.truck_id === formData.truck_id ? formData : truck)));
             alert("Truck updated successfully!");
         } catch (error) {
@@ -39,7 +37,7 @@ const ManageTrucks = ({ user, setUser }) => {
     } else {
         // Add truck
         try {
-            await axios.post(`${baseURL}/api/trucks/`, formData);
+            await apiClient.post(`/trucks/`, formData);
             setTrucks([...trucks, formData]);
             alert("Truck created successfully!");
         } catch (error) {
@@ -72,7 +70,7 @@ const ManageTrucks = ({ user, setUser }) => {
 
   const handleDelete = async (id) => {
     try {
-      await axios.delete(`${baseURL}/api/trucks/${id}`);
+      await apiClient.delete(`/trucks/${id}`);
       fetchTrucks();
     } catch (error) {
       console.error("Error deleting truck:", error);

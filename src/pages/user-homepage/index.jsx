@@ -1,18 +1,41 @@
 import React, {useState} from "react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import "../static/css/UserLandingPage.css";
+//import { useNavigate } from "react-router-dom";
+import Footer from "../../components/footer";
+import Header from "../../components/header";
+import "../../static/css/UserLandingPage.css";
+import western from "../../static/images/western.jpg";
+import averittdaycab from "../../static/images/averitt-daycab.jpg";
+import averittsleeper from "../../static/images/averitt-sleeper.jpg";
+import adams from "../../static/images/adams.jpg";
+import apiClient from "../../utils/ApiClient";
+import { useUser } from "../../UserContext";
 
-const UserLandingPage = ({ user, setUser }) => {
-  const navigate = useNavigate();
+const UserLandingPage = () => {
+  const { user, setUser } = useUser();
+  const isAdmin = user?.role === "Administrator";
+  //const navigate = useNavigate();
+  const [selectedCompany, setSelectedCompany] = useState("");
+  const [selectedTruckType, setSelectedTruckType] = useState("");
 
-  const baseURL = "http://localhost:5000";
+  const companyImages = {
+    Averitt: averittdaycab,
+    Western: averittsleeper,
+    Titans: western,
+    Adams: adams,
+    Custom: adams,
+  };
+
+  const handleCompanyChange = (e) => {
+    setSelectedCompany(e.target.value);
+  };
+
+  const handleTruckTypeChange = (e) => {
+    setSelectedTruckType(e.target.value);
+  };
 
   const [orderType, setOrderType] = useState("new");
   const [orderDetails, setOrderDetails] = useState({
-    userId: user?.users_id,
+    userId: isAdmin ? "" : user?.users_id,
     vin_no: "",
     category: "New",
     date: new Date().toLocaleDateString(),
@@ -52,7 +75,7 @@ const UserLandingPage = ({ user, setUser }) => {
 
   const handleVINValidation = async () => {
     try {
-      const response = await axios.post(`${baseURL}/api/orders/validate-vin`, { vin_no: vinNumber });
+      const response = await apiClient.post(`/orders/validate-vin`, { vin_no: vinNumber });
       if (response.data.success) {
         setError("");
         setSuccess("VIN number is valid.");
@@ -101,7 +124,7 @@ const UserLandingPage = ({ user, setUser }) => {
       // Proceed with placing the order
       try {
         const formData = new FormData();
-        formData.append("user_id", user?.users_id);
+        formData.append("user_id", isAdmin ? orderDetails.userId : user?.users_id);
         formData.append("vin_no", vinNumber);
         formData.append("category", orderDetails.category);
         formData.append("color", orderDetails.color);
@@ -118,7 +141,7 @@ const UserLandingPage = ({ user, setUser }) => {
           formData.append("picture", orderDetails.picture);
         }
 
-        const response = await axios.post(`${baseURL}/api/orders`, formData, {
+        const response = await apiClient.post(`/orders`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
@@ -151,6 +174,15 @@ const UserLandingPage = ({ user, setUser }) => {
       <main>
         <h2>Place Your Order</h2>
         <form onSubmit={handleSubmit}>
+          {isAdmin && <><label>User:</label><select
+            name="userId"
+            value={orderDetails.userId}
+            onChange={handleInputChange}
+          >
+            <option value="">Select User from the list</option>
+            <option value="4">ovais1@mailinator.com</option>
+          </select></>
+          }
           <label>Category:</label>
           <select
             name="category"
@@ -177,30 +209,42 @@ const UserLandingPage = ({ user, setUser }) => {
 
           {orderType === "new" && (
             <>
-              <label>Color:</label>
+              <label>Truck Company:</label>
               <select
-                name="color"
-                value={orderDetails.color}
-                onChange={handleInputChange}
+                name="truck_company"
+                value={selectedCompany}
+                onChange={handleCompanyChange}
               >
                 <option value="">Select Truck Color</option>
-                <option value="averitt">Averitt (Red)</option>
-                <option value="western">Western (White)</option>
-                <option value="titans">Titans (White)</option>
-                <option value="westernStar">Western Star (White)</option>
-                <option value="custom">Custom</option>
+                <option value="Adams">Adam's</option>
+                <option value="Averitt">Averitt (Red)</option>
+                <option value="Western">Western (White)</option>
+                <option value="Titans">Titans (White)</option>
+                <option value="WesternStar">Western Star (White)</option>
+                <option value="Custom">Custom</option>
               </select>
 
               <label>Type of Truck:</label>
               <select
                 name="truckType"
-                value={orderDetails.truck_type}
-                onChange={handleInputChange}
+                value={selectedTruckType}
+                onChange={handleTruckTypeChange}
               >
                 <option value="">Select Truck Type</option>
                 <option value="day cab">Day Cab</option>
                 <option value="sleeper">Sleeper</option>
               </select>
+
+              <label>Selected Truck Preview:</label>
+              <div className="truck-preview">
+                {selectedCompany && (
+                  <img
+                    src={companyImages[selectedCompany]}
+                    alt={selectedCompany}
+                    className="truck-image"
+                  />
+                )}
+              </div>
 
               <label>Price:</label>
               <input
@@ -221,7 +265,6 @@ const UserLandingPage = ({ user, setUser }) => {
                 name="color"
                 value={orderDetails.color}
                 onChange={handleInputChange}
-                required
               />
 
               <label>Type of Truck:</label>

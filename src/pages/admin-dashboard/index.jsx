@@ -1,8 +1,8 @@
 import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
-import Footer from "../components/Footer";
-import Header from "../components/Header";
-import "../static/css/AdminDashboard.css";
+import Footer from "../../components/footer";
+import Header from "../../components/header";
+import "../../static/css/AdminDashboard.css";
 
 const AdminDashboard = ({ user, setUser }) => {
     const [vin, setVin] = useState("");
@@ -39,7 +39,7 @@ const AdminDashboard = ({ user, setUser }) => {
             <li onClick={() => navigate("/admin/manage-trucks")}>Manage Trucks</li>
             <li onClick={() => navigate("/admin/manage-users")}>Manage Users</li>
             <li onClick={() => navigate("/admin/manage-orders")}>Manage Orders</li>
-            <li onClick={() => navigate("/admin/invoicing")}>Invoicing</li>
+            <li onClick={() => navigate("/admin/invoice-list")}>Invoicing</li>
             <li onClick={() => navigate("/admin/reports")}>Reports</li>
           </ul>
         </section>

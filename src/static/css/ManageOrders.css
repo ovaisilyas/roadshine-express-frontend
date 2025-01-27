@@ -24,6 +24,7 @@
     background: #fff;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
+    margin-bottom: 15px;
   }
 
   .order-table th, .order-table td {
@@ -76,7 +77,7 @@
     margin-bottom: 15px;
   }
 
-  .order-popup select, 
+  .order-popup select,
   .order-popup button {
     display: block;
     margin-bottom: 10px;
@@ -108,4 +109,16 @@
 
   .place-order-btn:hover {
     background-color: #0056b3;
+  }
+
+  .order-popup .order-image {
+    text-align: left;
+  }
+
+  .order-popup .order-image img {
+    max-width: 20%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-bottom: 15px;
   }

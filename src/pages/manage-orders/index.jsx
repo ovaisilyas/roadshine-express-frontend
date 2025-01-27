@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
-import Footer from "./Footer";
-import Header from "./Header";
-import "../static/css/ManageOrders.css";
+import { useNavigate } from "react-router-dom";
+import Footer from "../../components/footer";
+import Header from "../../components/header";
+import "../../static/css/ManageOrders.css";
+import apiClient from "../../utils/ApiClient";
 
 const ManageOrders = ({ user, setUser }) => {
   const [orders, setOrders] = useState([]);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [status, setStatus] = useState("");
   const [comment, setComment] = useState("");
-
-  const baseURL = "http://localhost:5000";
+  const navigate = useNavigate();
+  const [selectedImage, setSelectedImage] = useState(null);
+  const closeModal = () => setSelectedImage(null);
 
   useEffect(() => {
     fetchOrders();
@@ -18,8 +20,7 @@ const ManageOrders = ({ user, setUser }) => {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get(`${baseURL}/api/orders`);
-      console.log(response.data.orders)
+      const response = await apiClient.get("/orders");
       setOrders(response.data.orders);
     } catch (error) {
       console.error("Error fetching orders:", error);
@@ -28,7 +29,7 @@ const ManageOrders = ({ user, setUser }) => {
 
   const handleUpdateOrder = async (orderId) => {
     try {
-      await axios.put(`${baseURL}/api/orders/${orderId}`, { status, admin_comment: comment });
+      await apiClient.put(`/orders/${orderId}`, { status, admin_comment: comment });
       fetchOrders();
       setSelectedOrder(null);
     } catch (error) {
@@ -41,7 +42,7 @@ const ManageOrders = ({ user, setUser }) => {
         <Header user={user} setUser={setUser}/>
         <div className="orders-header">
             <h2>Manage Orders</h2>
-            <button onClick={() => window.location.href = "/admin/place-order"}>
+            <button onClick={() => navigate("/user")}>
                 Place Order on Behalf of User
             </button>
         </div>
@@ -52,6 +53,7 @@ const ManageOrders = ({ user, setUser }) => {
             <th>VIN Number</th>
             <th>Category</th>
             <th>Truck Type</th>
+            <th>Picture</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -63,6 +65,9 @@ const ManageOrders = ({ user, setUser }) => {
               <td>{order.vin_no}</td>
               <td>{order.category}</td>
               <td>{order.truck_type}</td>
+              <td>
+                {order.picture_url && <img src={order.picture_url} onClick={() => setSelectedImage(order.picture_url)} alt="Order Attachment" style={{ width: "100px", height: "75px" }} />}
+              </td>
               <td>{order.status}</td>
               <td>
                 <button onClick={() => setSelectedOrder(order)}>View / Edit</button>
@@ -79,6 +84,17 @@ const ManageOrders = ({ user, setUser }) => {
           <p><strong>Category:</strong> {selectedOrder.category}</p>
           <p><strong>Truck Type:</strong> {selectedOrder.truck_type}</p>
           <p><strong>Status:</strong> {selectedOrder.status}</p>
+          {selectedOrder.picture_url && (
+            <div className="order-image">
+              <h4>Uploaded Picture:</h4>
+              <img
+                src={selectedOrder.picture_url}
+                onClick={() => setSelectedImage(selectedOrder.picture_url)}
+                alt="Order Attachment"
+                style={{ maxWidth: "20%", borderRadius: "8px", marginBottom: "15px" }}
+              />
+            </div>
+          )}
           <textarea
             placeholder="Admin comment"
             value={comment}
@@ -93,6 +109,14 @@ const ManageOrders = ({ user, setUser }) => {
           </select>
           <button onClick={() => handleUpdateOrder(selectedOrder.order_id)}>Update</button>
           <button onClick={() => setSelectedOrder(null)}>Close</button>
+        </div>
+      )}
+       {/* Modal for the zoomed image */}
+       {selectedImage && (
+        <div className="modal" onClick={closeModal}>
+          <div className="modal-content">
+            <img src={selectedImage} alt="Zoomed Truck Attachment" />
+          </div>
         </div>
       )}
       <Footer />

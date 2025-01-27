@@ -1,15 +1,17 @@
 import React, {useState, useEffect} from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import LandingPage from "./pages/LandingPage";
-import SignInPage from "./pages/SignInPage";
-import UserLandingPage from "./pages/UserLandingPage";
-import AdminDashboard from "./pages/AdminDashboard";
-import ManageTrucks from "./components/ManageTrucks";
-import ManageUsers from "./components/ManageUsers";
-import ManageOrders from "./components/ManageOrders";
-import Invoicing from "./components/Invoicing";
-import Reports from "./components/Reports";
+import LandingPage from "./pages/home-page";
+import SignInPage from "./pages/signin-page";
+import UserLandingPage from "./pages/user-homepage";
+import AdminDashboard from "./pages/admin-dashboard";
+import ManageTrucks from "./pages/manage-trucks";
+import ManageUsers from "./pages/manage-users";
+import ManageOrders from "./pages/manage-orders";
+import Invoicing from "./pages/invoicing";
+import InvoiceList from "./pages/invoice-list";
+import Reports from "./pages/reports";
 import './App.css';
+import ProtectedRoute from "./routes/ProtectedRoute";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -28,12 +30,13 @@ const App = () => {
         <Route path="/" element={<LandingPage user={user} setUser={setUser} />} />
         <Route path="/signin" element={<SignInPage setUser={setUser}/>} />
         <Route path="/user" element={<UserLandingPage user={user} setUser={setUser}/>} />
-        <Route path="/admin" element={<AdminDashboard user={user} setUser={setUser}/>} />
-        <Route path="/admin/manage-trucks" element={<ManageTrucks user={user} setUser={setUser}/>} />
-        <Route path="/admin/manage-users" element={<ManageUsers user={user} setUser={setUser}/>} />
-        <Route path="/admin/manage-orders" element={<ManageOrders user={user} setUser={setUser}/>} />
-        <Route path="/admin/invoicing" element={<Invoicing user={user} setUser={setUser}/>} />
-        <Route path="/admin/reports" element={<Reports user={user} setUser={setUser}/>} />
+        <Route path="/admin" element={<ProtectedRoute><AdminDashboard user={user} setUser={setUser}/></ProtectedRoute>} />
+        <Route path="/admin/manage-trucks" element={<ProtectedRoute><ManageTrucks user={user} setUser={setUser}/></ProtectedRoute>} />
+        <Route path="/admin/manage-users" element={<ProtectedRoute><ManageUsers user={user} setUser={setUser}/></ProtectedRoute>} />
+        <Route path="/admin/manage-orders" element={<ProtectedRoute><ManageOrders user={user} setUser={setUser}/></ProtectedRoute>} />
+        <Route path="/admin/invoice-list" element={<ProtectedRoute><InvoiceList user={user} setUser={setUser}/></ProtectedRoute>} />
+        <Route path="/admin/invoicing" element={<ProtectedRoute><Invoicing user={user} setUser={setUser}/></ProtectedRoute>} />
+        <Route path="/admin/reports" element={<ProtectedRoute><Reports user={user} setUser={setUser}/></ProtectedRoute>} />
       </Routes>
     </Router>
   );
