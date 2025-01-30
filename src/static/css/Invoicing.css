@@ -1,44 +1,115 @@
 .invoice-page {
-    padding: 20px;
     margin: 0 auto;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
 }
 
-.invoice-page h2 {
-    text-align: center;
+.invoice-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.invoice-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.invoice-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.invoice-template {
+    border: 2px solid black;
+    padding: 20px;
+    background: white;
+}
+
+.invoice-template p {
     margin-bottom: 20px;
 }
 
-.invoice-page form {
-    display: flex;
+.invoice-address {
+    white-space: pre-line; /* Ensures multi-line addresses display correctly */
+    font-size: 14px;
+    color: black;
+    line-height: 30px;
+}
+
+.invoice-header {
     flex-direction: column;
-    gap: 15px;
-    margin: 0 auto;
-    margin-bottom: 15px;
+    text-align: center;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
 }
 
-.invoice-page label {
-    font-weight: bold;
+.invoice-header h1 {
+    font-size: 24px;
+    margin: 0;
+    margin-bottom: 30px;
 }
 
-.invoice-page input,
-.invoice-page select {
+.invoice-details {
+    margin-bottom: 20px;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.invoice-items {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.invoice-items th {
+    background-color: #f4f4f4;
+}
+
+.invoice-details td, .invoice-items th, .invoice-items td {
+    border: 1px solid black;
+    padding: 8px;
+}
+.invoice-items th {
+    background-color: #f4f4f4;
+}
+
+.invoice-details p {
+    font-size: 16px;
+    margin: 5px 0;
+}
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.invoice-table th, .invoice-table td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+}
+
+.invoice-footer {
+    text-align: right;
+    margin-top: 20px;
+}
+
+.invoice-footer h2 {
+    font-size: 18px;
+}
+
+.export-btn {
+    margin-top: 10px;
     padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.invoice-page button {
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: #fff;
+    background: blue;
+    color: white;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
+    border-radius: 4px;
+    margin-bottom: 20px;
 }
 
-.invoice-page button:hover {
-    background-color: #0056b3;
+.export-btn:hover {
+    background-color: darkblue;
 }

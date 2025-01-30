@@ -15,7 +15,46 @@ const UserLandingPage = () => {
   const isAdmin = user?.role === "Administrator";
   //const navigate = useNavigate();
   const [selectedCompany, setSelectedCompany] = useState("");
-  const [selectedTruckType, setSelectedTruckType] = useState("");
+  const [selectedTruckCompany, setSelectedTruckCompany] = useState("");
+  const [orderRows, setOrderRows] = useState([
+    {
+      vin: "",
+      date: new Date().toLocaleDateString(),
+      truck_type: "Day Cab",
+      price: 225,
+      custom_price: 0,
+    },
+  ]);
+
+  const truckCompanies = ["Adam's", "Averitt", "Western", "Western Star", "Titans"];
+  const companies = ["Velocity", "Peterbilt", "International", "Volvo", "Kenworth"];
+
+  const handleAddRow = () => {
+    setOrderRows([
+      ...orderRows,
+      {
+        vin: "",
+        date: new Date().toLocaleDateString(),
+        truck_type: "Day Cab",
+        price: 225,
+        custom_price: 0,
+      },
+    ]);
+  };
+
+  const handleRemoveRow = (index) => {
+    const updatedRows = orderRows.filter((_, i) => i !== index);
+    setOrderRows(updatedRows);
+  };
+
+  const handleRowChange = (index, field, value) => {
+    if(field === "vin"){
+      handleVINChange(value);
+    }
+    const updatedRows = [...orderRows];
+    updatedRows[index][field] = value;
+    setOrderRows(updatedRows);
+  };
 
   const companyImages = {
     Averitt: averittdaycab,
@@ -25,25 +64,18 @@ const UserLandingPage = () => {
     Custom: adams,
   };
 
-  const handleCompanyChange = (e) => {
-    setSelectedCompany(e.target.value);
-  };
-
-  const handleTruckTypeChange = (e) => {
-    setSelectedTruckType(e.target.value);
-  };
-
-  const [orderType, setOrderType] = useState("new");
+  const [orderType, setOrderType] = useState("New");
   const [orderDetails, setOrderDetails] = useState({
     userId: isAdmin ? "" : user?.users_id,
     vin_no: "",
     category: "New",
     date: new Date().toLocaleDateString(),
     color: "",
-    truck_type: "day cab",
-    services: "quick wash",
+    truck_type: "Day Cab",
+    services: "",
     customOrder: "",
     price: 225,
+    custom_price: 0,
     picture: null,
     comment: "",
   });
@@ -62,8 +94,8 @@ const UserLandingPage = () => {
   // Function to validate VIN
   const validateVIN = (vin) => /^[A-Za-z0-9]{6}$/.test(vin);
 
-  const handleVINChange = (e) => {
-    const value = e.target.value.toUpperCase();
+  const handleVINChange = (value) => {
+    value = value.toUpperCase();
     setVinNumber(value);
 
     if (!validateVIN(value)) {
@@ -102,12 +134,12 @@ const UserLandingPage = () => {
     }
     if (name === "category") {
       if(value === "New"){
-        setOrderType("new")
+        setOrderType("New")
       } else {
-        setOrderType("used")
+        setOrderType("Used")
       }
       updatedPrice = value === "New" ? 225 : 0; // Default price for "New" is 225, for "Used" it's dynamic
-    } else if (name === "services" && orderDetails.category === "used") {
+    } else if (name === "services" && orderDetails.category === "Used") {
       updatedPrice = servicePrices[value] || 0;
     }
     setOrderDetails({ ...orderDetails, [name]: value, price: updatedPrice, });
@@ -121,19 +153,19 @@ const UserLandingPage = () => {
     e.preventDefault();
     const isValid = await handleVINValidation();
     if (isValid) {
-      // Proceed with placing the order
       try {
         const formData = new FormData();
         formData.append("user_id", isAdmin ? orderDetails.userId : user?.users_id);
-        formData.append("vin_no", vinNumber);
         formData.append("category", orderDetails.category);
         formData.append("color", orderDetails.color);
-        formData.append("truck_type", orderDetails.truck_type);
-        formData.append("services", orderDetails.services);
+        if(orderDetails.category === "Used") {
+          formData.append("services", orderDetails.services);
+        } else {
+          formData.append("services", "");
+        }
         if (orderDetails.customOrder) {
           formData.append("custom_order", orderDetails.customOrder);
         }
-        formData.append("price", orderDetails.price);
         if (orderDetails.comment) {
           formData.append("comment", orderDetails.comment);
         }
@@ -141,30 +173,56 @@ const UserLandingPage = () => {
           formData.append("picture", orderDetails.picture);
         }
 
+        // Append each row of order details
+        orderRows.forEach((row, index) => {
+          formData.append(`orders[${index}][vin]`, orderDetails.category === "Used" ? vinNumber : row.vin);
+          formData.append(`orders[${index}][date]`, orderDetails.category === "Used" ? orderDetails.date : row.date);
+          formData.append(`orders[${index}][truck_company]`, orderDetails.category === "Used" ? selectedTruckCompany   : row.truck_company);
+          formData.append(`orders[${index}][truck_type]`, orderDetails.category === "Used" ? orderDetails.truck_type : row.truck_type);
+          formData.append(`orders[${index}][price]`, orderDetails.category === "Used" ? orderDetails.price : row.price);
+          formData.append(`orders[${index}][custom_price]`, orderDetails.category === "Used" ? orderDetails.custom_price : row.custom_price);
+          formData.append(`orders[${index}][company]`, orderDetails.category === "Used" ? selectedCompany : row.company);
+        });
+
         const response = await apiClient.post(`/orders`, formData, {
           headers: { "Content-Type": "multipart/form-data" },
         });
 
         if (response.data.success) {
           alert("Order placed successfully!");
+          setOrderRows([
+            {
+              vin: "",
+              date: new Date().toLocaleDateString(),
+              truck_company: "",
+              truck_type: "Day Cab",
+              price: 225,
+              custom_price: 0,
+              company: "",
+            },
+          ]);
           setOrderDetails({
             vin_no: "",
             category: "New",
             color: "",
+            truck_company: "",
             truck_type: "",
             services: "",
             custom_order: "",
-            price: 225,
+            price: 0,
+            custom_price: 0,
             comment: "",
+            company: "",
             picture: null,
           });
+          setVinNumber("");
+          setError("");
+          setSuccess("");
         }
       } catch (error) {
         console.error("Error placing order:", error);
         alert("Failed to place the order. Please try again.");
       }
-      console.log("Order placed with VIN:", vinNumber);
-      // Additional order submission logic here
     }
   };
 
@@ -173,7 +231,6 @@ const UserLandingPage = () => {
       <Header user={user} setUser={setUser}/>
       <main>
         <h2>Place Your Order</h2>
-        <form onSubmit={handleSubmit}>
           {isAdmin && <><label>User:</label><select
             name="userId"
             value={orderDetails.userId}
@@ -189,134 +246,211 @@ const UserLandingPage = () => {
             value={orderDetails.category}
             onChange={handleInputChange}
           >
-            <option value="new">New</option>
-            <option value="used">Used</option>
+            <option value="New">New</option>
+            <option value="Used">Used</option>
           </select>
 
-          <label>VIN Number:</label>
-          <input
-            type="text"
-            name="vin"
-            value={vinNumber}
-            onChange={handleVINChange}
-            maxLength={6}
-            required
-          />
-          {error && <p className="error-message">{error}</p>}
-          {success && <p className="success-message">{success}</p>}
-          <label>Date:</label>
-          <input type="text" value={orderDetails.date} disabled />
-
-          {orderType === "new" && (
+          {orderType === "New" && (
             <>
-              <label>Truck Company:</label>
-              <select
-                name="truck_company"
-                value={selectedCompany}
-                onChange={handleCompanyChange}
-              >
-                <option value="">Select Truck Color</option>
-                <option value="Adams">Adam's</option>
-                <option value="Averitt">Averitt (Red)</option>
-                <option value="Western">Western (White)</option>
-                <option value="Titans">Titans (White)</option>
-                <option value="WesternStar">Western Star (White)</option>
-                <option value="Custom">Custom</option>
-              </select>
+              {orderRows.map((row, index) => (
+                <div key={index} className="order-row">
+                  <input
+                    type="text"
+                    placeholder="VIN"
+                    value={row.vin}
+                    maxLength={6}
+                    onChange={(e) => handleRowChange(index, "vin", e.target.value)}
+                  />
+                  {error && <p className="error-message">{error}</p>}
+                  {success && <p className="success-message">{success}</p>}
+                  <input
+                    type="text"
+                    placeholder="Date"
+                    value={row.date}
+                    onChange={(e) => handleRowChange(index, "date", e.target.value)}
+                    disabled
+                  />
+                  <select
+                    value={row.truck_company}
+                    onChange={(e) => handleRowChange(index, "truck_company", e.target.value)}
+                  >
+                    <option value="">Select Truck Company</option>
+                    {truckCompanies.map((truckcompany) => (
+                      <option key={truckcompany} value={truckcompany}>{truckcompany}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={row.truck_type}
+                    onChange={(e) => handleRowChange(index, "truck_type", e.target.value)}
+                  >
+                    <option value="Day Cab">Day Cab</option>
+                    <option value="Sleeper">Sleeper</option>
+                  </select>
 
-              <label>Type of Truck:</label>
-              <select
-                name="truckType"
-                value={selectedTruckType}
-                onChange={handleTruckTypeChange}
-              >
-                <option value="">Select Truck Type</option>
-                <option value="day cab">Day Cab</option>
-                <option value="sleeper">Sleeper</option>
-              </select>
+                  <div className="truck-preview">
+                    {selectedTruckCompany && (
+                      <img
+                        src={companyImages[selectedTruckCompany]}
+                        alt={selectedTruckCompany}
+                        className="truck-image"/>
+                    )}
+                  </div>
+                  <input
+                    type="number"
+                    placeholder="Price"
+                    value={row.price}
+                    onChange={(e) => handleRowChange(index, "price", e.target.value)}
+                    disabled
+                  />
+                  <input
+                    type="number"
+                    placeholder="Custom Price"
+                    value={row.custom_price}
+                    onChange={(e) => handleRowChange(index, "custom_price", e.target.value)}
+                  />
+                  <select
+                    value={row.company}
+                    onChange={(e) => handleRowChange(index, "company", e.target.value)}
+                  >
+                    <option value="">Select Company</option>
+                    {companies.map((company) => (
+                      <option key={company} value={company}>{company}</option>
+                    ))}
+                  </select>
+                  {orderRows.length > 1 && (
+                    <button type="button" onClick={() => handleRemoveRow(index)}>
+                      Remove
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button type="button" onClick={handleAddRow}>
+                Add Row
+              </button>
+            </>
+          )}
 
-              <label>Selected Truck Preview:</label>
-              <div className="truck-preview">
-                {selectedCompany && (
-                  <img
-                    src={companyImages[selectedCompany]}
-                    alt={selectedCompany}
-                    className="truck-image"
+          {orderType === "Used" && (
+            <>
+              <div>
+              <label>VIN:</label>
+                <input
+                  type="text"
+                  placeholder="VIN"
+                  value={vinNumber}
+                  name="vin_no"
+                  maxLength={6}
+                  onChange={(e) => handleVINChange(e.target.value)}
+                />
+                {error && <p className="error-message">{error}</p>}
+                {success && <p className="success-message">{success}</p>}
+              </div>
+              <div>
+                <label>Color:</label>
+                <input
+                  type="text"
+                  name="color"
+                  value={orderDetails.color}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div>
+                <label>Truck Company:</label>
+                <select value={selectedTruckCompany} onChange={(e) => {
+                    const newValue = e.target.value;
+                    setSelectedTruckCompany(newValue);
+                  }}>
+                    <option value="">Select Truck Company</option>
+                  {truckCompanies.map((truckcompany) => (
+                    <option key={truckcompany} value={truckcompany}>{truckcompany}</option>
+                  ))}
+                </select>
+                <label>Type of Truck:</label>
+                <select
+                  name="truck_type"
+                  value={orderDetails.truck_type}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select Truck Type</option>
+                  <option value="Day Cab">Day Cab</option>
+                  <option value="Sleeper">Sleeper</option>
+                </select>
+                <div className="truck-preview">
+                  <label>Selected Truck Preview:</label>
+                  {selectedTruckCompany && (
+                    <img
+                      src={companyImages[selectedTruckCompany]}
+                      alt={selectedTruckCompany}
+                      className="truck-image"/>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label>Type of Wash:</label>
+                <select
+                  name="services"
+                  value={orderDetails.services}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Select a Service</option>
+                  <option value="Extreme Detail">Extreme Detail - $2200</option>
+                  <option value="Full Detail">Full Detail - $1300</option>
+                  <option value="Partial Detail">Partial Detail - $1000</option>
+                  <option value="Quick Wash">Quick Wash - $300</option>
+                  <option value="Custom Order">Custom Order</option>
+                </select>
+                {orderDetails.washType === "custom order" && (
+                  <textarea
+                    name="customOrder"
+                    placeholder="Describe your custom order"
+                    value={orderDetails.customOrder}
+                    onChange={handleInputChange}
                   />
                 )}
               </div>
 
-              <label>Price:</label>
-              <input
-                type="number"
-                name="price"
-                value={orderDetails.price}
-                onChange={handleInputChange}
-                readOnly
-              />
-            </>
-          )}
+              <div>
+                <label>Price:</label>
+                <input
+                  type="number"
+                  name="price"
+                  value={orderDetails.price}
+                  onChange={handleInputChange}
+                  disabled
+                />
 
-          {orderType === "used" && (
-            <>
-              <label>Color:</label>
-              <input
-                type="text"
-                name="color"
-                value={orderDetails.color}
-                onChange={handleInputChange}
-              />
-
-              <label>Type of Truck:</label>
-              <select
-                name="truckType"
-                value={orderDetails.truck_type}
-                onChange={handleInputChange}
-              >
-                <option value="">Select Truck Type</option>
-                <option value="day cab">Day Cab</option>
-                <option value="sleeper">Sleeper</option>
-              </select>
-
-              <label>Type of Wash:</label>
-              <select
-                name="services"
-                value={orderDetails.services}
-                onChange={handleInputChange}
-              >
-                <option value="">Select a Service</option>
-                <option value="Extreme Detail">Extreme Detail - $2200</option>
-                <option value="Full Detail">Full Detail - $1300</option>
-                <option value="partial detail">Partial Detail - $1000</option>
-                <option value="quick wash">Quick Wash - $300</option>
-                <option value="custom order">Custom Order</option>
-              </select>
-
-              <label>Price:</label>
-              <input
-                type="number"
-                name="price"
-                value={orderDetails.price}
-                onChange={handleInputChange}
-                readOnly
-              />
-
-              {orderDetails.washType === "custom order" && (
-                <textarea
-                  name="customOrder"
-                  placeholder="Describe your custom order"
-                  value={orderDetails.customOrder}
+                <label>Custom Price:</label>
+                <input
+                  type="number"
+                  name="custom_price"
+                  placeholder="Custom Price"
+                  value={orderDetails.custom_price}
                   onChange={handleInputChange}
                 />
-              )}
+              </div>
+              <div>
+              <label>Company:</label>
+                <select value={selectedCompany} onChange={(e) => {
+                    const newValue = e.target.value;
+                    setSelectedCompany(newValue);
+                  }}>
+                    <option value="">Select Company</option>
+                  {companies.map((company) => (
+                    <option key={company} value={company}>{company}</option>
+                  ))}
+                </select>
+              </div>
             </>
           )}
 
-          <label>Picture Attachment (Optional):</label>
-          <input type="file" onChange={handleFileChange} />
+          <div className="order-picture">
+            <label>Picture Attachment (Optional):</label>
+            <input type="file" onChange={handleFileChange} />
+          </div>
 
-          <button type="submit">Place Order</button>
-        </form>
+          <button type="button" onClick={handleSubmit}>Place Order</button>
       </main>
       <Footer />
     </div>

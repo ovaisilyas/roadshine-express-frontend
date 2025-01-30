@@ -1,0 +1,43 @@
+.report-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .report-controls {
+    margin: 20px 0;
+  }
+
+  .report-controls label {
+    margin-right: 10px;
+  }
+
+  .report-controls select {
+    padding: 5px;
+    margin-right: 10px;
+  }
+
+  .report-controls button {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  .report-controls button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+
+  .report-results {
+    margin-top: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    background-color: #f9f9f9;
+  }
+
+  .error {
+    color: red;
+    margin-top: 10px;
+  }

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useUser } from "../UserContext";
 
 // Create an Axios instance
 const apiClient = axios.create({
@@ -23,11 +24,18 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.log(error.response.status);
     if (error.response && error.response.status === 401) {
       // Handle unauthorized errors (e.g., redirect to login)
       console.error("Unauthorized. Please log in again.");
       localStorage.removeItem("authToken"); // Clear token on 401
       window.location.href = "/signin"; // Redirect to login page
+    } else if (error.response && error.response.status === 403) {
+      console.error("Session expired. Redirecting to login...");
+
+      // Call handleSessionExpiry() from UserContext
+      const { handleSessionExpiry } = useUser();
+      handleSessionExpiry();
     }
     return Promise.reject(error);
   }

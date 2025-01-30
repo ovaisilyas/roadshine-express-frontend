@@ -105,6 +105,7 @@ const UserForm = ({ user = {}, onSubmit, onCancel }) => {
       >
         <option value="User">User</option>
         <option value="Administrator">Administrator</option>
+        <option value="Accountant">Accountant</option>
       </select>
       <button type="submit">{formData?.users_id ? "Save Changes" : "Add User"}</button>
       <button type="button" onClick={onCancel}>

@@ -90,13 +90,13 @@ const TruckForm = ({ truck = {}, onSubmit, onCancel }) => {
         onChange={handleChange}
       >
         <option value="adams">Adam's</option>
-        <option value="averitt">Averitt</option>
-        <option value="western">Western</option>
-        <option value="titans">Titans</option>
-        <option value="western star">Western Star</option>
-        <option value="custom">Custom</option>
+        <option value="Averitt">Averitt</option>
+        <option value="Western">Western</option>
+        <option value="Titans">Titans</option>
+        <option value="Western Star">Western Star</option>
+        <option value="Custom">Custom</option>
       </select>
-      {formData.truck_company === "custom" && (
+      {formData.truck_company === "Custom" && (
         <input
           type="text"
           name="customTruckCompany"
@@ -111,8 +111,8 @@ const TruckForm = ({ truck = {}, onSubmit, onCancel }) => {
         value={formData.truck_type}
         onChange={handleChange}
       >
-        <option value="day cab">Day Cab</option>
-        <option value="sleeper">Sleeper</option>
+        <option value="Day Cab">Day Cab</option>
+        <option value="Sleeper">Sleeper</option>
       </select>
       <label>Price</label>
       <input
@@ -128,14 +128,14 @@ const TruckForm = ({ truck = {}, onSubmit, onCancel }) => {
         value={formData.company}
         onChange={handleChange}
       >
-        <option value="velocity">Velocity</option>
-        <option value="kenworth">Kenworth</option>
-        <option value="volvo">Volvo</option>
-        <option value="international">International</option>
-        <option value="peterbilt">Peterbilt</option>
-        <option value="custom">Custom</option>
+        <option value="Velocity">Velocity</option>
+        <option value="Kenworth">Kenworth</option>
+        <option value="Volvo">Volvo</option>
+        <option value="International">International</option>
+        <option value="Peterbilt">Peterbilt</option>
+        <option value="Custom">Custom</option>
       </select>
-      {formData.company === "custom" && (
+      {formData.company === "Custom" && (
         <input
           type="text"
           name="custom_company"
