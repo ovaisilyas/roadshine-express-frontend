@@ -34,6 +34,7 @@ const Header = () => {
           {isUser && (
             <>
               <li onClick={() => navigate("/user")}>Place Order</li>
+              <li onClick={() => navigate("/user/orders")}>Order History</li>
             </>
           )}
           {isAdmin && (

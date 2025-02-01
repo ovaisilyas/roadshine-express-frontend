@@ -79,3 +79,24 @@ button:hover {
 .order-row button:hover {
   background-color: #cc0000;
 }
+
+.truck-preview {
+  margin-top: 20px;
+  justify-content: center;
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.truck-image {
+  width: 900px;
+  height: auto;
+  border-radius: 8px;
+  border: 2px solid #ccc;
+  max-width: 100%;
+}
+
+.used-order-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}

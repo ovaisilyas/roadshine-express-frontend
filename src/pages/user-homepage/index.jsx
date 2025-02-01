@@ -3,12 +3,9 @@ import React, {useState} from "react";
 import Footer from "../../components/footer";
 import Header from "../../components/header";
 import "../../static/css/UserLandingPage.css";
-import western from "../../static/images/western.jpg";
-import averittdaycab from "../../static/images/averitt-daycab.jpg";
-import averittsleeper from "../../static/images/averitt-sleeper.jpg";
-import adams from "../../static/images/adams.jpg";
 import apiClient from "../../utils/ApiClient";
 import { useUser } from "../../UserContext";
+import TruckImage from "../../components/truck-image";
 
 const UserLandingPage = () => {
   const { user, setUser } = useUser();
@@ -16,6 +13,7 @@ const UserLandingPage = () => {
   //const navigate = useNavigate();
   const [selectedCompany, setSelectedCompany] = useState("");
   const [selectedTruckCompany, setSelectedTruckCompany] = useState("");
+  const [selectedTruckType, setSelectedTruckType] = useState("Day Cab");
   const [orderRows, setOrderRows] = useState([
     {
       vin: "",
@@ -26,8 +24,8 @@ const UserLandingPage = () => {
     },
   ]);
 
-  const truckCompanies = ["Adam's", "Averitt", "Western", "Western Star", "Titans"];
-  const companies = ["Velocity", "Peterbilt", "International", "Volvo", "Kenworth"];
+  const truckCompanies = ["Adam's", "Averitt", "Western", "Western Star", "Titans", "Custom"];
+  const companies = ["Velocity", "Peterbilt", "International", "Volvo", "Kenworth", "Custom"];
 
   const handleAddRow = () => {
     setOrderRows([
@@ -51,17 +49,15 @@ const UserLandingPage = () => {
     if(field === "vin"){
       handleVINChange(value);
     }
+    if(field === "truck_company") {
+      setSelectedTruckCompany(value);
+    }
+    if(field === "truck_type") {
+      setSelectedTruckType(value);
+    }
     const updatedRows = [...orderRows];
     updatedRows[index][field] = value;
     setOrderRows(updatedRows);
-  };
-
-  const companyImages = {
-    Averitt: averittdaycab,
-    Western: averittsleeper,
-    Titans: western,
-    Adams: adams,
-    Custom: adams,
   };
 
   const [orderType, setOrderType] = useState("New");
@@ -128,15 +124,18 @@ const UserLandingPage = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let updatedPrice = orderDetails.price;
-    if(name === "services"){
-      console.log("orderDetails.category: "+orderDetails.category)
-      console.log("value: "+value)
+    if(name === "truck_type"){
+      setSelectedTruckType(value);
     }
     if (name === "category") {
       if(value === "New"){
         setOrderType("New")
+        setError("")
+        setSuccess("")
       } else {
         setOrderType("Used")
+        setError("")
+        setSuccess("")
       }
       updatedPrice = value === "New" ? 225 : 0; // Default price for "New" is 225, for "Used" it's dynamic
     } else if (name === "services" && orderDetails.category === "Used") {
@@ -261,8 +260,6 @@ const UserLandingPage = () => {
                     maxLength={6}
                     onChange={(e) => handleRowChange(index, "vin", e.target.value)}
                   />
-                  {error && <p className="error-message">{error}</p>}
-                  {success && <p className="success-message">{success}</p>}
                   <input
                     type="text"
                     placeholder="Date"
@@ -286,15 +283,6 @@ const UserLandingPage = () => {
                     <option value="Day Cab">Day Cab</option>
                     <option value="Sleeper">Sleeper</option>
                   </select>
-
-                  <div className="truck-preview">
-                    {selectedTruckCompany && (
-                      <img
-                        src={companyImages[selectedTruckCompany]}
-                        alt={selectedTruckCompany}
-                        className="truck-image"/>
-                    )}
-                  </div>
                   <input
                     type="number"
                     placeholder="Price"
@@ -324,123 +312,128 @@ const UserLandingPage = () => {
                   )}
                 </div>
               ))}
+              {error && <p className="error-message">{error}</p>}
+              {success && <p className="success-message">{success}</p>}
               <button type="button" onClick={handleAddRow}>
                 Add Row
               </button>
+              <div className="truck-preview">
+                {selectedTruckCompany && (
+                  <TruckImage truckCompany={selectedTruckCompany} truckType={selectedTruckType} />
+                )}
+              </div>
             </>
           )}
 
           {orderType === "Used" && (
             <>
-              <div>
-              <label>VIN:</label>
-                <input
-                  type="text"
-                  placeholder="VIN"
-                  value={vinNumber}
-                  name="vin_no"
-                  maxLength={6}
-                  onChange={(e) => handleVINChange(e.target.value)}
-                />
-                {error && <p className="error-message">{error}</p>}
-                {success && <p className="success-message">{success}</p>}
-              </div>
-              <div>
-                <label>Color:</label>
-                <input
-                  type="text"
-                  name="color"
-                  value={orderDetails.color}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div>
-                <label>Truck Company:</label>
-                <select value={selectedTruckCompany} onChange={(e) => {
-                    const newValue = e.target.value;
-                    setSelectedTruckCompany(newValue);
-                  }}>
-                    <option value="">Select Truck Company</option>
-                  {truckCompanies.map((truckcompany) => (
-                    <option key={truckcompany} value={truckcompany}>{truckcompany}</option>
-                  ))}
-                </select>
-                <label>Type of Truck:</label>
-                <select
-                  name="truck_type"
-                  value={orderDetails.truck_type}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select Truck Type</option>
-                  <option value="Day Cab">Day Cab</option>
-                  <option value="Sleeper">Sleeper</option>
-                </select>
-                <div className="truck-preview">
-                  <label>Selected Truck Preview:</label>
-                  {selectedTruckCompany && (
-                    <img
-                      src={companyImages[selectedTruckCompany]}
-                      alt={selectedTruckCompany}
-                      className="truck-image"/>
-                  )}
+              <div className="used-order-wrapper">
+                <div>
+                  <label>VIN:</label>
+                  <input
+                    type="text"
+                    placeholder="VIN"
+                    value={vinNumber}
+                    name="vin_no"
+                    maxLength={6}
+                    onChange={(e) => handleVINChange(e.target.value)}
+                  />
+                  {error && <p className="error-message">{error}</p>}
+                  {success && <p className="success-message">{success}</p>}
                 </div>
-              </div>
-
-              <div>
-                <label>Type of Wash:</label>
-                <select
-                  name="services"
-                  value={orderDetails.services}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Select a Service</option>
-                  <option value="Extreme Detail">Extreme Detail - $2200</option>
-                  <option value="Full Detail">Full Detail - $1300</option>
-                  <option value="Partial Detail">Partial Detail - $1000</option>
-                  <option value="Quick Wash">Quick Wash - $300</option>
-                  <option value="Custom Order">Custom Order</option>
-                </select>
-                {orderDetails.washType === "custom order" && (
-                  <textarea
-                    name="customOrder"
-                    placeholder="Describe your custom order"
-                    value={orderDetails.customOrder}
+                <div>
+                  <label>Color:</label>
+                  <input
+                    type="text"
+                    name="color"
+                    value={orderDetails.color}
                     onChange={handleInputChange}
                   />
-                )}
-              </div>
+                </div>
 
-              <div>
-                <label>Price:</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={orderDetails.price}
-                  onChange={handleInputChange}
-                  disabled
-                />
+                <div>
+                  <label>Truck Company:</label>
+                  <select value={selectedTruckCompany} onChange={(e) => {
+                      const newValue = e.target.value;
+                      setSelectedTruckCompany(newValue);
+                    }}>
+                      <option value="">Select Truck Company</option>
+                    {truckCompanies.map((truckcompany) => (
+                      <option key={truckcompany} value={truckcompany}>{truckcompany}</option>
+                    ))}
+                  </select>
+                  <label>Type of Truck:</label>
+                  <select
+                    name="truck_type"
+                    value={orderDetails.truck_type}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select Truck Type</option>
+                    <option value="Day Cab">Day Cab</option>
+                    <option value="Sleeper">Sleeper</option>
+                  </select>
+                </div>
 
-                <label>Custom Price:</label>
-                <input
-                  type="number"
-                  name="custom_price"
-                  placeholder="Custom Price"
-                  value={orderDetails.custom_price}
-                  onChange={handleInputChange}
-                />
-              </div>
-              <div>
-              <label>Company:</label>
-                <select value={selectedCompany} onChange={(e) => {
-                    const newValue = e.target.value;
-                    setSelectedCompany(newValue);
-                  }}>
-                    <option value="">Select Company</option>
-                  {companies.map((company) => (
-                    <option key={company} value={company}>{company}</option>
-                  ))}
-                </select>
+                <div>
+                  <label>Type of Wash:</label>
+                  <select
+                    name="services"
+                    value={orderDetails.services}
+                    onChange={handleInputChange}
+                  >
+                    <option value="">Select a Service</option>
+                    <option value="Extreme Detail">Extreme Detail - $2200</option>
+                    <option value="Full Detail">Full Detail - $1300</option>
+                    <option value="Partial Detail">Partial Detail - $1000</option>
+                    <option value="Quick Wash">Quick Wash - $300</option>
+                    <option value="Custom Order">Custom Order</option>
+                  </select>
+                  {orderDetails.washType === "custom order" && (
+                    <textarea
+                      name="customOrder"
+                      placeholder="Describe your custom order"
+                      value={orderDetails.customOrder}
+                      onChange={handleInputChange}
+                    />
+                  )}
+                </div>
+
+                <div>
+                  <label>Price:</label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={orderDetails.price}
+                    onChange={handleInputChange}
+                    disabled
+                  />
+
+                  <label>Custom Price:</label>
+                  <input
+                    type="number"
+                    name="custom_price"
+                    placeholder="Custom Price"
+                    value={orderDetails.custom_price}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                <label>Company:</label>
+                  <select value={selectedCompany} onChange={(e) => {
+                      const newValue = e.target.value;
+                      setSelectedCompany(newValue);
+                    }}>
+                      <option value="">Select Company</option>
+                    {companies.map((company) => (
+                      <option key={company} value={company}>{company}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="truck-preview">
+                  {selectedTruckCompany && (
+                    <TruckImage truckCompany={selectedTruckCompany} truckType={selectedTruckType} />
+                  )}
+                </div>
               </div>
             </>
           )}
