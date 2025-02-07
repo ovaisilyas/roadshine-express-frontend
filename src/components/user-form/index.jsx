@@ -1,6 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import apiClient from "../../utils/ApiClient";
 
 const UserForm = ({ user = {}, onSubmit, onCancel }) => {
+  const [companies, setCompanies] = useState([]);
   const [formData, setFormData] = useState({
     users_id: user?.users_id || "",
     first_name: user?.first_name || "",
@@ -13,6 +15,19 @@ const UserForm = ({ user = {}, onSubmit, onCancel }) => {
     status: user?.status || "active",
     role: user?.role || "User",
   });
+
+  useEffect(() => {
+    fetchCompanies();
+  }, []);
+
+  const fetchCompanies = async () => {
+      try {
+          const response = await apiClient.get("/trucks/companies");
+          setCompanies(response.data.map((c) => c.company));
+      } catch (error) {
+          console.error("Error fetching companies:", error);
+      }
+  };
 
   const handleChange = (e) => {
     setFormData({
@@ -71,13 +86,12 @@ const UserForm = ({ user = {}, onSubmit, onCancel }) => {
         required={!formData?.users_id} // Password is only required when adding a new user
       />
       <label>Company</label>
-      <input
-        type="text"
-        name="company"
-        value={formData.company}
-        onChange={handleChange}
-        required
-      />
+      <select value={formData.company} name="company" onChange={handleChange}>
+          <option value="">Select Company</option>
+          {companies.map((company, index) => (
+              <option key={index} value={company}>{company}</option>
+          ))}
+      </select>
       <label>Organization</label>
       <input
         type="text"
