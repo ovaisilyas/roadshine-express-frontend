@@ -1,0 +1,75 @@
+.manage-truck-companies {
+    margin: auto;
+    padding: 20px;
+}
+
+.manage-truck-comp-body {
+    max-width: 800px;
+    margin: auto;
+}
+
+h2, h3 {
+    text-align: center;
+    color: #333;
+}
+
+select, input, button {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+button {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.error {
+    color: red;
+    font-size: 14px;
+    text-align: center;
+}
+
+.edit-btn {
+    background-color: #ffc107;
+    margin-right: 5px;
+}
+
+.edit-btn:hover {
+    background-color: #e0a800;
+}
+
+.delete-btn {
+    background-color: #dc3545;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+img {
+    border-radius: 5px;
+}

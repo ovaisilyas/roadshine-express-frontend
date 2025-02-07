@@ -13,6 +13,7 @@ import Reports from "./pages/reports";
 import './App.css';
 import ProtectedRoute from "./routes/ProtectedRoute";
 import OrderHistoryPage from "./pages/order-history";
+import ManageTruckCompanies from "./pages/manage-truck-companies";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -33,6 +34,7 @@ const App = () => {
         <Route path="/user" element={<UserLandingPage user={user} setUser={setUser}/>} />
         <Route path="/user/orders" element={<OrderHistoryPage user={user} setUser={setUser}/>} />
         <Route path="/admin" element={<ProtectedRoute><AdminDashboard user={user} setUser={setUser}/></ProtectedRoute>} />
+        <Route path="/admin/manage-truck-companies" element={<ProtectedRoute><ManageTruckCompanies user={user} setUser={setUser}/></ProtectedRoute>} />
         <Route path="/admin/manage-trucks" element={<ProtectedRoute><ManageTrucks user={user} setUser={setUser}/></ProtectedRoute>} />
         <Route path="/admin/manage-users" element={<ProtectedRoute><ManageUsers user={user} setUser={setUser}/></ProtectedRoute>} />
         <Route path="/admin/manage-orders" element={<ProtectedRoute><ManageOrders user={user} setUser={setUser}/></ProtectedRoute>} />
