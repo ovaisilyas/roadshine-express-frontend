@@ -1,19 +1,59 @@
 import React, { useState, useEffect } from "react";
+import apiClient from "../../utils/ApiClient";
 
 const TruckForm = ({ truck = {}, onSubmit, onCancel }) => {
+  const [companies, setCompanies] = useState([]);
+  const [truckCompanies, setTruckCompanies] = useState([]);
+  const [uniqueTruckCompanies, setUniqueTruckCompanies] = useState([]);
+  const [availableTruckTypes, setAvailableTruckTypes] = useState([]);
+  const [selectedTruckType, setSelectedTruckType] = useState("Day Cab");
+  const [selectedCompany, setSelectedCompany] = useState("");
   const [formData, setFormData] = useState({
     truck_id: truck?.truck_id || "",
     vin_no: truck?.vin_no || "",
     color: truck?.color || "",
-    truck_company: truck?.truck_company || "adams",
+    truck_company: truck?.truck_company || "Adams",
     customTruckCompany: truck?.custom_truck_company || "",
-    truck_type: truck?.truck_type || "day cab",
+    truck_type: truck?.truck_type || "Day Cab",
     price: truck?.price || "",
-    company: truck?.company || "Velocity",
+    company: truck?.company || selectedCompany,
     custom_company: truck?.custom_company || "",
   });
   const [vinNumber, setVinNumber] = useState(formData?.vin_no || "");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    fetchCompanies();
+}, []);
+
+const fetchCompanies = async () => {
+    try {
+        const response = await apiClient.get("/trucks/companies");
+        setCompanies(response.data.map((c) => c.company));
+    } catch (error) {
+        console.error("Error fetching companies:", error);
+    }
+};
+
+const fetchTruckCompanies = async (company) => {
+    if(company === "") {
+        setSelectedCompany("");
+        setUniqueTruckCompanies([]);
+        return;
+    }
+
+    setSelectedCompany(company);
+    try {
+        const response = await apiClient.get(`/trucks/truckcompanies?company=${company}`);
+        const companies = response.data;
+        const distinctCompanies = [...new Set(companies.map((c) => c.truck_company))];
+        setTruckCompanies(companies);
+        setUniqueTruckCompanies(distinctCompanies);
+    } catch (error) {
+        console.error("Error fetching truck companies:", error);
+    }
+
+};
 
   // Function to validate VIN
   const validateVIN = (vin) => /^[A-Za-z0-9]{6}$/.test(vin);
@@ -30,6 +70,14 @@ const TruckForm = ({ truck = {}, onSubmit, onCancel }) => {
   };
 
   const handleChange = (e) => {
+    if(e.target.name === 'truck_company'){
+      const types = truckCompanies
+        .filter((truck) => truck.truck_company === e.target.value)
+        .map((truck) => truck.truck_type);
+      console.log(types);
+      setAvailableTruckTypes([...new Set(types)]); // Ensure unique truck types
+      setSelectedTruckType(types[0]); // Default to the first truck type
+    }
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
@@ -52,6 +100,10 @@ const TruckForm = ({ truck = {}, onSubmit, onCancel }) => {
 
   // Initialize customTruckCompany if truck_company has 'Custom' in it
   useEffect(() => {
+    if(truck?.company !== ""){
+      setSelectedCompany(truck?.company);
+      fetchTruckCompanies(truck?.company);
+    }
     if (truck?.truck_company?.startsWith("Custom")) {
       const customValue = truck.truck_company.match(/\(([^)]+)\)/)?.[1] || "";
       setFormData((prev) => ({
@@ -60,7 +112,7 @@ const TruckForm = ({ truck = {}, onSubmit, onCancel }) => {
         customTruckCompany: customValue,
       }));
     }
-  }, [truck?.truck_company]);
+  }, [truck?.truck_company, truck?.company]);
 
   return (
     <form className="truck-form" onSubmit={handleSubmit}>
@@ -89,12 +141,10 @@ const TruckForm = ({ truck = {}, onSubmit, onCancel }) => {
         value={formData.truck_company}
         onChange={handleChange}
       >
-        <option value="adams">Adam's</option>
-        <option value="Averitt">Averitt</option>
-        <option value="Western">Western</option>
-        <option value="Titans">Titans</option>
-        <option value="Western Star">Western Star</option>
-        <option value="Custom">Custom</option>
+          <option value="">Select Truck Company</option>
+        {uniqueTruckCompanies.map((truckcompany) => (
+          <option key={truckcompany} value={truckcompany}>{truckcompany}</option>
+        ))}
       </select>
       {formData.truck_company === "Custom" && (
         <input
@@ -108,11 +158,12 @@ const TruckForm = ({ truck = {}, onSubmit, onCancel }) => {
       <label>Truck Type</label>
       <select
         name="truck_type"
-        value={formData.truck_type}
+        value={selectedTruckType}
         onChange={handleChange}
       >
-        <option value="Day Cab">Day Cab</option>
-        <option value="Sleeper">Sleeper</option>
+        {availableTruckTypes.map((type, index) => (
+          <option key={index} value={type}>{type}</option>
+        ))}
       </select>
       <label>Price</label>
       <input
@@ -125,15 +176,13 @@ const TruckForm = ({ truck = {}, onSubmit, onCancel }) => {
       <label>Company</label>
       <select
         name="company"
-        value={formData.company}
-        onChange={handleChange}
+        value={selectedCompany}
+        onChange={(e) => fetchTruckCompanies(e.target.value)}
       >
-        <option value="Velocity">Velocity</option>
-        <option value="Kenworth">Kenworth</option>
-        <option value="Volvo">Volvo</option>
-        <option value="International">International</option>
-        <option value="Peterbilt">Peterbilt</option>
-        <option value="Custom">Custom</option>
+        <option value="">Select Company</option>
+        {companies.map((company, index) => (
+            <option key={index} value={company}>{company}</option>
+        ))}
       </select>
       {formData.company === "Custom" && (
         <input
