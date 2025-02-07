@@ -11,6 +11,7 @@ const UserLandingPage = () => {
   const { user, setUser } = useUser();
   const isAdmin = user?.role === "Administrator";
   //const navigate = useNavigate();
+  const [isDropdownDisabled, setIsDropdownDisabled] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState("");
   const [selectedTruckCompany, setSelectedTruckCompany] = useState("");
   const [selectedTruckType, setSelectedTruckType] = useState("Day Cab");
@@ -47,7 +48,7 @@ const UserLandingPage = () => {
 
   const handleRowChange = (index, field, value) => {
     if(field === "vin"){
-      handleVINChange(value);
+      handleVINChange(value, index);
     }
     if(field === "truck_company") {
       setSelectedTruckCompany(value);
@@ -90,33 +91,56 @@ const UserLandingPage = () => {
   // Function to validate VIN
   const validateVIN = (vin) => /^[A-Za-z0-9]{6}$/.test(vin);
 
-  const handleVINChange = (value) => {
-    value = value.toUpperCase();
-    setVinNumber(value);
-
-    if (!validateVIN(value)) {
-      setError("VIN number must be a 6-character alphanumeric value.");
-    } else {
-      setError(""); // Clear error if validation passes
+  const handleVINChange = (value, index) => {
+    const vinInput = value.toUpperCase();
+    if (vinInput.length > 6) return;
+    setVinNumber(vinInput);
+    if (vinInput.length === 6 && validateVIN(vinInput)) {
+      console.log("✅ VIN format is valid (6 characters), checking database...");
+      handleVINValidation(vinInput, index);
+    } else if (vinInput.length < 6) {
+        //console.warn("❌ VIN is not complete yet (less than 6 characters)");
+        setSelectedTruckCompany(""); // Reset fields if invalid
+        setSelectedCompany("");
+        setIsDropdownDisabled(false); // Allow manual selection
     }
   };
 
-  const handleVINValidation = async () => {
+  const handleVINValidation = async (vin, index) => {
     try {
-      const response = await apiClient.post(`/orders/validate-vin`, { vin_no: vinNumber });
+      const response = await apiClient.post(`/orders/validate-vin`, { vin_no: vin });
       if (response.data.success) {
         setError("");
         setSuccess("VIN number is valid.");
+        console.log(response.data.truck.company);
+        const updatedTruckCompany = response.data.truck.truck_company;
+        const updatedCompany = response.data.truck.company;
+        const updatedTruckType = response.data.truck.truck_type;
+        handleRowChange(index, "truck_company", updatedTruckCompany);
+        handleRowChange(index, "truck_type", updatedTruckType);
+        handleRowChange(index, "company", updatedCompany);
+        setSelectedTruckCompany(updatedTruckCompany);
+        setSelectedCompany(updatedCompany);
+        setSelectedTruckType(updatedTruckType);
+        setIsDropdownDisabled(true);
         return true;
       } else {
         setError(response.data.error);
         setSuccess("");
+        setSelectedTruckCompany("");
+        setSelectedCompany("");
+        setSelectedTruckType("");
+        setIsDropdownDisabled(false);
         return false;
       }
     } catch (error) {
       console.error('Error validating VIN:', error.response?.data?.message || error.message);
       setError(error.response?.data?.message || error.message);
       setSuccess("");
+      setSelectedTruckCompany("");
+      setSelectedCompany("");
+      setSelectedTruckType("");
+      setIsDropdownDisabled(false);
       return false;
     }
   };
@@ -150,78 +174,75 @@ const UserLandingPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const isValid = await handleVINValidation();
-    if (isValid) {
-      try {
-        const formData = new FormData();
-        formData.append("user_id", isAdmin ? orderDetails.userId : user?.users_id);
-        formData.append("category", orderDetails.category);
-        formData.append("color", orderDetails.color);
-        if(orderDetails.category === "Used") {
-          formData.append("services", orderDetails.services);
-        } else {
-          formData.append("services", "");
-        }
-        if (orderDetails.customOrder) {
-          formData.append("custom_order", orderDetails.customOrder);
-        }
-        if (orderDetails.comment) {
-          formData.append("comment", orderDetails.comment);
-        }
-        if (orderDetails.picture) {
-          formData.append("picture", orderDetails.picture);
-        }
-
-        // Append each row of order details
-        orderRows.forEach((row, index) => {
-          formData.append(`orders[${index}][vin]`, orderDetails.category === "Used" ? vinNumber : row.vin);
-          formData.append(`orders[${index}][date]`, orderDetails.category === "Used" ? orderDetails.date : row.date);
-          formData.append(`orders[${index}][truck_company]`, orderDetails.category === "Used" ? selectedTruckCompany   : row.truck_company);
-          formData.append(`orders[${index}][truck_type]`, orderDetails.category === "Used" ? orderDetails.truck_type : row.truck_type);
-          formData.append(`orders[${index}][price]`, orderDetails.category === "Used" ? orderDetails.price : row.price);
-          formData.append(`orders[${index}][custom_price]`, orderDetails.category === "Used" ? orderDetails.custom_price : row.custom_price);
-          formData.append(`orders[${index}][company]`, orderDetails.category === "Used" ? selectedCompany : row.company);
-        });
-
-        const response = await apiClient.post(`/orders`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-
-        if (response.data.success) {
-          alert("Order placed successfully!");
-          setOrderRows([
-            {
-              vin: "",
-              date: new Date().toLocaleDateString(),
-              truck_company: "",
-              truck_type: "Day Cab",
-              price: 225,
-              custom_price: 0,
-              company: "",
-            },
-          ]);
-          setOrderDetails({
-            vin_no: "",
-            category: "New",
-            color: "",
-            truck_company: "",
-            truck_type: "",
-            services: "",
-            custom_order: "",
-            price: 0,
-            custom_price: 0,
-            comment: "",
-            company: "",
-            picture: null,
-          });
-          setVinNumber("");
-          setError("");
-          setSuccess("");
-        }
-      } catch (error) {
-        console.error("Error placing order:", error);
-        alert("Failed to place the order. Please try again.");
+    try {
+      const formData = new FormData();
+      formData.append("user_id", isAdmin ? orderDetails.userId : user?.users_id);
+      formData.append("category", orderDetails.category);
+      formData.append("color", orderDetails.color);
+      if(orderDetails.category === "Used") {
+        formData.append("services", orderDetails.services);
+      } else {
+        formData.append("services", "");
       }
+      if (orderDetails.customOrder) {
+        formData.append("custom_order", orderDetails.customOrder);
+      }
+      if (orderDetails.comment) {
+        formData.append("comment", orderDetails.comment);
+      }
+      if (orderDetails.picture) {
+        formData.append("picture", orderDetails.picture);
+      }
+
+      // Append each row of order details
+      orderRows.forEach((row, index) => {
+        formData.append(`orders[${index}][vin]`, orderDetails.category === "Used" ? vinNumber : row.vin);
+        formData.append(`orders[${index}][date]`, orderDetails.category === "Used" ? orderDetails.date : row.date);
+        formData.append(`orders[${index}][truck_company]`, orderDetails.category === "Used" ? "Custom" : row.truck_company);
+        formData.append(`orders[${index}][truck_type]`, orderDetails.category === "Used" ? orderDetails.truck_type : row.truck_type);
+        formData.append(`orders[${index}][price]`, orderDetails.category === "Used" ? orderDetails.price : row.price);
+        formData.append(`orders[${index}][custom_price]`, orderDetails.category === "Used" ? orderDetails.custom_price : row.custom_price);
+        formData.append(`orders[${index}][company]`, orderDetails.category === "Used" ? selectedCompany : row.company);
+      });
+
+      const response = await apiClient.post(`/orders`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.data.success) {
+        alert("Order placed successfully!");
+        setOrderRows([
+          {
+            vin: "",
+            date: new Date().toLocaleDateString(),
+            truck_company: "",
+            truck_type: "Day Cab",
+            price: 225,
+            custom_price: 0,
+            company: "",
+          },
+        ]);
+        setOrderDetails({
+          vin_no: "",
+          category: "New",
+          color: "",
+          truck_company: "",
+          truck_type: "",
+          services: "",
+          custom_order: "",
+          price: 0,
+          custom_price: 0,
+          comment: "",
+          company: "",
+          picture: null,
+        });
+        setVinNumber("");
+        setError("");
+        setSuccess("");
+      }
+    } catch (error) {
+      console.error("Error placing order:", error);
+      alert("Failed to place the order. Please try again.");
     }
   };
 
@@ -270,6 +291,7 @@ const UserLandingPage = () => {
                   <select
                     value={row.truck_company}
                     onChange={(e) => handleRowChange(index, "truck_company", e.target.value)}
+                    disabled={isDropdownDisabled}
                   >
                     <option value="">Select Truck Company</option>
                     {truckCompanies.map((truckcompany) => (
@@ -299,6 +321,7 @@ const UserLandingPage = () => {
                   <select
                     value={row.company}
                     onChange={(e) => handleRowChange(index, "company", e.target.value)}
+                    disabled={isDropdownDisabled}
                   >
                     <option value="">Select Company</option>
                     {companies.map((company) => (
@@ -336,7 +359,7 @@ const UserLandingPage = () => {
                     value={vinNumber}
                     name="vin_no"
                     maxLength={6}
-                    onChange={(e) => handleVINChange(e.target.value)}
+                    onChange={(e) => handleVINChange(e.target.value, 0)}
                   />
                   {error && <p className="error-message">{error}</p>}
                   {success && <p className="success-message">{success}</p>}
@@ -352,16 +375,6 @@ const UserLandingPage = () => {
                 </div>
 
                 <div>
-                  <label>Truck Company:</label>
-                  <select value={selectedTruckCompany} onChange={(e) => {
-                      const newValue = e.target.value;
-                      setSelectedTruckCompany(newValue);
-                    }}>
-                      <option value="">Select Truck Company</option>
-                    {truckCompanies.map((truckcompany) => (
-                      <option key={truckcompany} value={truckcompany}>{truckcompany}</option>
-                    ))}
-                  </select>
                   <label>Type of Truck:</label>
                   <select
                     name="truck_type"
@@ -419,7 +432,7 @@ const UserLandingPage = () => {
                 </div>
                 <div>
                 <label>Company:</label>
-                  <select value={selectedCompany} onChange={(e) => {
+                  <select value={selectedCompany} disabled={isDropdownDisabled} onChange={(e) => {
                       const newValue = e.target.value;
                       setSelectedCompany(newValue);
                     }}>
