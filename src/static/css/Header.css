@@ -7,7 +7,7 @@
   color: white;
 }
 
-.logo {
+.header-logo {
   font-size: 1.5rem;
   font-weight: bold;
   cursor: pointer;
@@ -60,6 +60,14 @@
   display: flex;
   gap: 10px;
   float: right;
+}
+
+.signin-username {
+  width: 100%;
+}
+
+.signout-button {
+  width: 100%;
 }
 
 @media (max-width: 1115px) {

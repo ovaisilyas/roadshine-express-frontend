@@ -24,7 +24,7 @@ const Header = () => {
 
   return (
     <header className="header">
-      <h1>Roadshine Express</h1>
+      <h1 className="header-logo" onClick={() => navigate("/")}>Roadshine Express</h1>
       <button className="menu-toggle" onClick={toggleMenu}>
         ☰
       </button>
@@ -49,15 +49,15 @@ const Header = () => {
             </>
           )}
         </ul>
-        {user ? (
-            <div className="signin">
-              <p>Hello, {user.first_name}!</p>
-              <button onClick={handleSignOut}>Sign Out</button>
-            </div>
-          ) : (
-            <button onClick={() => navigate("/signin")}>Sign In</button>
-          )}
       </nav>
+      {user ? (
+        <div className="signin">
+          <p className="signin-username">Hello, {user.first_name}!</p>
+          <button className="signout-button" onClick={handleSignOut}>Sign Out</button>
+        </div>
+      ) : (
+        <button onClick={() => navigate("/signin")}>Sign In</button>
+      )}
     </header>
   );
 };
