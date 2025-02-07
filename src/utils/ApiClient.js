@@ -1,10 +1,17 @@
 import axios from "axios";
-import { useUser } from "../UserContext";
 
 // Create an Axios instance
 const apiClient = axios.create({
   baseURL: "http://localhost:5000/api", // Replace with your backend API URL
 });
+
+const logoutUser = () => {
+  console.warn("🚨 Session Expired - Logging Out User...");
+  alert("⚠️ Your session has expired. Please log in again.");
+  localStorage.removeItem("authToken");
+  localStorage.removeItem("user");
+  window.location.href = "/signin"; // ✅ Redirect to login page
+};
 
 // Add a request interceptor to include the JWT token
 apiClient.interceptors.request.use(
@@ -20,24 +27,20 @@ apiClient.interceptors.request.use(
   }
 );
 
-// Add a response interceptor to handle errors (optional)
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => response, // ✅ Pass successful responses
   (error) => {
-    console.log(error.response.status);
-    if (error.response && error.response.status === 401) {
-      // Handle unauthorized errors (e.g., redirect to login)
-      console.error("Unauthorized. Please log in again.");
-      localStorage.removeItem("authToken"); // Clear token on 401
-      window.location.href = "/signin"; // Redirect to login page
-    } else if (error.response && error.response.status === 403) {
-      console.error("Session expired. Redirecting to login...");
+      if (error.response) {
+          console.error("🔥 API Error:", error);
+          console.error("❌ API Response Status:", error.response.status);
 
-      // Call handleSessionExpiry() from UserContext
-      const { handleSessionExpiry } = useUser();
-      handleSessionExpiry();
-    }
-    return Promise.reject(error);
+          if (error.response.status === 401) {
+              logoutUser(); // ✅ Handle expired token by logging out user
+          }
+      } else {
+          console.error("🚨 Network Error or No Response from Server");
+      }
+      return Promise.reject(error);
   }
 );
 
