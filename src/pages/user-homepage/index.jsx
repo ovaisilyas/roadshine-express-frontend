@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 //import { useNavigate } from "react-router-dom";
 import Footer from "../../components/footer";
 import Header from "../../components/header";
@@ -12,9 +12,14 @@ const UserLandingPage = () => {
   const isAdmin = user?.role === "Administrator";
   //const navigate = useNavigate();
   const [isDropdownDisabled, setIsDropdownDisabled] = useState(false);
-  const [selectedCompany, setSelectedCompany] = useState("");
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState(user?.company);
+  const [truckCompanies, setTruckCompanies] = useState([]);
   const [selectedTruckCompany, setSelectedTruckCompany] = useState("");
+  const [uniqueTruckCompanies, setUniqueTruckCompanies] = useState([]);
   const [selectedTruckType, setSelectedTruckType] = useState("Day Cab");
+  const [availableTruckTypes, setAvailableTruckTypes] = useState([]);
+  const [activeUsers, setActiveUsers] = useState([]);
   const [orderRows, setOrderRows] = useState([
     {
       vin: "",
@@ -25,10 +30,55 @@ const UserLandingPage = () => {
     },
   ]);
 
-  const truckCompanies = ["Adam's", "Averitt", "Western", "Western Star", "Titans", "Custom"];
-  const companies = ["Velocity", "Peterbilt", "International", "Volvo", "Kenworth", "Custom"];
+  useEffect(() => {
+    const selCompany = user?.company;
+    setSelectedCompany(selCompany);
+    fetchTruckCompanies(selCompany);
+    setIsButtonDisabled(true);
+  }, [user?.company]);
+
+  useEffect(() => {
+    if(isAdmin){
+      fetchAllActiveUsers();
+    }
+  }, [isAdmin]);
+
+  const fetchTruckCompanies = async (company) => {
+      if(company === "") {
+          setSelectedCompany("");
+          return;
+      }
+
+      setSelectedCompany(company);
+      try {
+          const response = await apiClient.get(`/trucks/truckcompanies?company=${company}`);
+          const companies = response.data;
+          console.log(companies);
+          const distinctCompanies = [...new Set(companies.map((c) => c.truck_company))];
+          setTruckCompanies(companies);
+          setUniqueTruckCompanies(distinctCompanies);
+      } catch (error) {
+          console.error("Error fetching truck companies:", error);
+      }
+
+  };
+
+  const fetchAllActiveUsers = async () => {
+    try {
+      const response = await apiClient.get(`/users/active-users`);
+      const users = response.data;
+      console.log(users);
+      setActiveUsers(users);
+    } catch (error) {
+        console.error("Error fetching active users:", error);
+    }
+  };
 
   const handleAddRow = () => {
+    if(error){
+      return;
+    }
+    setIsButtonDisabled(false);
     setOrderRows([
       ...orderRows,
       {
@@ -44,14 +94,32 @@ const UserLandingPage = () => {
   const handleRemoveRow = (index) => {
     const updatedRows = orderRows.filter((_, i) => i !== index);
     setOrderRows(updatedRows);
+    if(!error){
+      setIsButtonDisabled(false);
+    } else {
+      setError("");
+      setIsButtonDisabled(false);
+    }
   };
 
   const handleRowChange = (index, field, value) => {
+    if(error){
+      setError("");
+      setIsButtonDisabled(false);
+    }
     if(field === "vin"){
       handleVINChange(value, index);
     }
     if(field === "truck_company") {
       setSelectedTruckCompany(value);
+      console.log(value);
+      console.log(truckCompanies);
+      const types = truckCompanies
+        .filter((truck) => truck.truck_company === value)
+        .map((truck) => truck.truck_type);
+      console.log(types);
+      setAvailableTruckTypes([...new Set(types)]); // Ensure unique truck types
+      setSelectedTruckType(types[0]); // Default to the first truck type
     }
     if(field === "truck_type") {
       setSelectedTruckType(value);
@@ -96,41 +164,47 @@ const UserLandingPage = () => {
     if (vinInput.length > 6) return;
     setVinNumber(vinInput);
     if (vinInput.length === 6 && validateVIN(vinInput)) {
-      console.log("✅ VIN format is valid (6 characters), checking database...");
       handleVINValidation(vinInput, index);
     } else if (vinInput.length < 6) {
-        //console.warn("❌ VIN is not complete yet (less than 6 characters)");
         setSelectedTruckCompany(""); // Reset fields if invalid
-        setSelectedCompany("");
         setIsDropdownDisabled(false); // Allow manual selection
+        setIsButtonDisabled(true);
     }
   };
 
   const handleVINValidation = async (vin, index) => {
     try {
       const response = await apiClient.post(`/orders/validate-vin`, { vin_no: vin });
+      setSelectedCompany(selectedCompany);
       if (response.data.success) {
-        setError("");
-        setSuccess("VIN number is valid.");
-        console.log(response.data.truck.company);
-        const updatedTruckCompany = response.data.truck.truck_company;
-        const updatedCompany = response.data.truck.company;
-        const updatedTruckType = response.data.truck.truck_type;
-        handleRowChange(index, "truck_company", updatedTruckCompany);
-        handleRowChange(index, "truck_type", updatedTruckType);
-        handleRowChange(index, "company", updatedCompany);
-        setSelectedTruckCompany(updatedTruckCompany);
-        setSelectedCompany(updatedCompany);
-        setSelectedTruckType(updatedTruckType);
-        setIsDropdownDisabled(true);
-        return true;
+        if(response.data.truck.company !== user?.company) {
+          setError("User's company doesn't match with Truck's company");
+          setSuccess("");
+          setSelectedTruckCompany("");
+          setSelectedTruckType("");
+          setIsDropdownDisabled(false);
+          setIsButtonDisabled(true);
+          return false;
+        } else {
+          setError("");
+          setSuccess("VIN number is valid.");
+          const updatedTruckCompany = response.data.truck.truck_company;
+          const updatedTruckType = response.data.truck.truck_type;
+          handleRowChange(index, "truck_company", updatedTruckCompany);
+          handleRowChange(index, "truck_type", updatedTruckType);
+          setSelectedTruckCompany(updatedTruckCompany);
+          setSelectedTruckType(updatedTruckType);
+          setIsDropdownDisabled(true);
+          setIsButtonDisabled(false);
+          return true;
+        }
       } else {
         setError(response.data.error);
         setSuccess("");
         setSelectedTruckCompany("");
-        setSelectedCompany("");
         setSelectedTruckType("");
         setIsDropdownDisabled(false);
+        setIsButtonDisabled(true);
         return false;
       }
     } catch (error) {
@@ -138,9 +212,9 @@ const UserLandingPage = () => {
       setError(error.response?.data?.message || error.message);
       setSuccess("");
       setSelectedTruckCompany("");
-      setSelectedCompany("");
       setSelectedTruckType("");
       setIsDropdownDisabled(false);
+      setIsButtonDisabled(true);
       return false;
     }
   };
@@ -170,6 +244,7 @@ const UserLandingPage = () => {
 
   const handleFileChange = (e) => {
     setOrderDetails({ ...orderDetails, picture: e.target.files[0] });
+    setIsButtonDisabled(false);
   };
 
   const handleSubmit = async (e) => {
@@ -202,7 +277,7 @@ const UserLandingPage = () => {
         formData.append(`orders[${index}][truck_type]`, orderDetails.category === "Used" ? orderDetails.truck_type : row.truck_type);
         formData.append(`orders[${index}][price]`, orderDetails.category === "Used" ? orderDetails.price : row.price);
         formData.append(`orders[${index}][custom_price]`, orderDetails.category === "Used" ? orderDetails.custom_price : row.custom_price);
-        formData.append(`orders[${index}][company]`, orderDetails.category === "Used" ? selectedCompany : row.company);
+        formData.append(`orders[${index}][company]`, selectedCompany);
       });
 
       const response = await apiClient.post(`/orders`, formData, {
@@ -257,7 +332,10 @@ const UserLandingPage = () => {
             onChange={handleInputChange}
           >
             <option value="">Select User from the list</option>
-            <option value="4">ovais1@mailinator.com</option>
+            {activeUsers.map((user) => (
+              <option key={user.users_id} value={user.users_id}>{user.email}</option>
+            ))};
+            
           </select></>
           }
           <label>Category:</label>
@@ -294,7 +372,7 @@ const UserLandingPage = () => {
                     disabled={isDropdownDisabled}
                   >
                     <option value="">Select Truck Company</option>
-                    {truckCompanies.map((truckcompany) => (
+                    {uniqueTruckCompanies.map((truckcompany) => (
                       <option key={truckcompany} value={truckcompany}>{truckcompany}</option>
                     ))}
                   </select>
@@ -302,8 +380,9 @@ const UserLandingPage = () => {
                     value={row.truck_type}
                     onChange={(e) => handleRowChange(index, "truck_type", e.target.value)}
                   >
-                    <option value="Day Cab">Day Cab</option>
-                    <option value="Sleeper">Sleeper</option>
+                    {availableTruckTypes.map((type, index) => (
+                      <option key={index} value={type}>{type}</option>
+                    ))}
                   </select>
                   <input
                     type="number"
@@ -321,12 +400,9 @@ const UserLandingPage = () => {
                   <select
                     value={row.company}
                     onChange={(e) => handleRowChange(index, "company", e.target.value)}
-                    disabled={isDropdownDisabled}
+                    disabled={true}
                   >
-                    <option value="">Select Company</option>
-                    {companies.map((company) => (
-                      <option key={company} value={company}>{company}</option>
-                    ))}
+                    <option value={selectedCompany}>{selectedCompany}</option>
                   </select>
                   {orderRows.length > 1 && (
                     <button type="button" onClick={() => handleRemoveRow(index)}>
@@ -436,16 +512,8 @@ const UserLandingPage = () => {
                       const newValue = e.target.value;
                       setSelectedCompany(newValue);
                     }}>
-                      <option value="">Select Company</option>
-                    {companies.map((company) => (
-                      <option key={company} value={company}>{company}</option>
-                    ))}
+                      <option value={selectedCompany}>{selectedCompany}</option>
                   </select>
-                </div>
-                <div className="truck-preview">
-                  {selectedTruckCompany && (
-                    <TruckImage truckCompany={selectedTruckCompany} truckType={selectedTruckType} />
-                  )}
                 </div>
               </div>
             </>
@@ -456,7 +524,7 @@ const UserLandingPage = () => {
             <input type="file" onChange={handleFileChange} />
           </div>
 
-          <button type="button" onClick={handleSubmit}>Place Order</button>
+          <button type="button" onClick={handleSubmit} disabled={isButtonDisabled}>Place Order</button>
       </main>
       <Footer />
     </div>

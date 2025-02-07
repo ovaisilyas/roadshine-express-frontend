@@ -33,6 +33,7 @@ textarea {
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 1rem;
+  width: 100%;
 }
 
 button {
@@ -47,6 +48,13 @@ button {
 
 button:hover {
   background-color: #0056b3;
+}
+
+button:disabled {
+  background-color: #ccc; /* Gray background */
+  color: #666; /* Light gray text */
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .success-message {
