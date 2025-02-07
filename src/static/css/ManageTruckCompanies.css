@@ -13,7 +13,7 @@ h2, h3 {
     color: #333;
 }
 
-select, input, button {
+.manage-truck-comp-body button {
     width: 100%;
     padding: 8px;
     margin: 5px 0;
@@ -21,13 +21,29 @@ select, input, button {
     border-radius: 5px;
 }
 
-button {
+.manage-truck-comp-body select {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.manage-truck-comp-body input {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.manage-truck-comp-body button:hover {
     background-color: #007bff;
     color: white;
     cursor: pointer;
 }
 
-button:hover {
+.manage-truck-comp-body button:hover {
     background-color: #0056b3;
 }
 
