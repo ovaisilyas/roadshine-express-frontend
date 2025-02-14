@@ -34,7 +34,7 @@ const UserLandingPage = () => {
     const selCompany = user?.company;
     setSelectedCompany(selCompany);
     fetchTruckCompanies(selCompany);
-    setIsButtonDisabled(true);
+    //setIsButtonDisabled(true);
   }, [user?.company]);
 
   useEffect(() => {
@@ -164,11 +164,11 @@ const UserLandingPage = () => {
     if (vinInput.length > 6) return;
     setVinNumber(vinInput);
     if (vinInput.length === 6 && validateVIN(vinInput)) {
-      handleVINValidation(vinInput, index);
+      //handleVINValidation(vinInput, index);
     } else if (vinInput.length < 6) {
         setSelectedTruckCompany(""); // Reset fields if invalid
         setIsDropdownDisabled(false); // Allow manual selection
-        setIsButtonDisabled(true);
+        //setIsButtonDisabled(true);
     }
   };
 
@@ -204,7 +204,7 @@ const UserLandingPage = () => {
         setSelectedTruckCompany("");
         setSelectedTruckType("");
         setIsDropdownDisabled(false);
-        setIsButtonDisabled(true);
+        //setIsButtonDisabled(true);
         return false;
       }
     } catch (error) {
