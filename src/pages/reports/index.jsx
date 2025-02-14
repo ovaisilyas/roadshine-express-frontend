@@ -62,7 +62,7 @@ const ReportPage = ({ user, setUser }) => {
 
     //Title
     doc.setFontSize(18);
-    doc.text("Report", 14, 20);
+    doc.text("Financial Report", 14, 20);
 
     //Period
     doc.setFontSize(12);
@@ -87,6 +87,9 @@ const ReportPage = ({ user, setUser }) => {
     // Total Expenses
     doc.setFontSize(14);
     doc.text(`Total Expenses: $${calculateTotalExpenses()}`, 14, 80 + manualExpenses.length * 10);
+
+    doc.setFontSize(14);
+    doc.text(`Total Profit/Loss: $${parseFloat(reportData.totalRevenue).toFixed(2) - calculateTotalExpenses()}`, 14, 110);
 
     doc.save(`report_${reportData.period}.pdf`);
   };
@@ -145,7 +148,11 @@ const ReportPage = ({ user, setUser }) => {
         <button button onClick={handleAddExpense}>Add Expense</button>
 
         <h3>Total Expenses: ${calculateTotalExpenses()}</h3>
-
+        {reportData && (
+          <div>
+            <h3>Total Profit/Loss: ${parseFloat(reportData.totalRevenue) - calculateTotalExpenses()}</h3>
+          </div>
+        )}
         <button onClick={handleExportToPDF}>Export to PDF</button>
       </main>
       <Footer />
