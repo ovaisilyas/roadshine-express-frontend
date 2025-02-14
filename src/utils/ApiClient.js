@@ -1,8 +1,10 @@
 import axios from "axios";
 
+const baseURL = process.env.NODE_ENV === 'production' ? "api" : "http://localhost:5000/api";
+
 // Create an Axios instance
 const apiClient = axios.create({
-  baseURL: "http://localhost:5000/api", // Replace with your backend API URL
+  baseURL,
 });
 
 const logoutUser = () => {
