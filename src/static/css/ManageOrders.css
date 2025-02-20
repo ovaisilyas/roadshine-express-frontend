@@ -1,6 +1,4 @@
 .manage-orders {
-    display: flex;
-    flex-direction: column;
     padding: 20px;
     min-height: 100vh;
     background-color: #f9f9f9;

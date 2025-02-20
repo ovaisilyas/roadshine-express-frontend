@@ -14,6 +14,9 @@ import './App.css';
 import ProtectedRoute from "./routes/ProtectedRoute";
 import OrderHistoryPage from "./pages/order-history";
 import ManageTruckCompanies from "./pages/manage-truck-companies";
+import Services from "./pages/services";
+import AboutUs from "./pages/aboutus";
+import ContactUs from "./pages/contactus";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -30,6 +33,9 @@ const App = () => {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage user={user} setUser={setUser} />} />
+        <Route path="/services" element={<Services user={user} setUser={setUser} />} />
+        <Route path="/about" element={<AboutUs user={user} setUser={setUser} />} />
+        <Route path="/contact" element={<ContactUs user={user} setUser={setUser} />} />
         <Route path="/signin" element={<SignInPage setUser={setUser}/>} />
         <Route path="/user" element={<UserLandingPage user={user} setUser={setUser}/>} />
         <Route path="/user/orders" element={<OrderHistoryPage user={user} setUser={setUser}/>} />

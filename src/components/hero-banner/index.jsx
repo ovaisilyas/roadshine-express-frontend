@@ -29,6 +29,11 @@ const HeroBanner = () => {
           <img key={idx} src={img} alt={`Slide ${idx + 1}`} />
         ))}
       </div>
+      <div class="hero-text">
+        <h1>Professional Truck Washing & Detailing</h1>
+        <p>Keeping your fleet spotless with cutting-edge technology and exceptional service.</p>
+        <button>Get a Free Quote</button>
+      </div>
     </div>
   );
 };

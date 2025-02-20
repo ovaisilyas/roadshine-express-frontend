@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import { useNavigate } from "react-router-dom";
 import "../../static/css/Header.css";
 import { useUser } from "../../UserContext";
+import logo from "../../static/images/logo.jpg"
 
 const Header = () => {
   const { user, setUser } = useUser();
@@ -23,14 +24,32 @@ const Header = () => {
   };
 
   return (
-    <header className="header">
-      <h1 className="header-logo" onClick={() => navigate("/")}>Roadshine Express</h1>
-      <button className="menu-toggle" onClick={toggleMenu}>
-        ☰
-      </button>
+    <>
+      <header className="header">
+        <div className="logo-heading">
+          <img className="logo-img" src={logo} alt="Roadshine Express LLC"/>
+          <h1 className="header-logo" onClick={() => navigate("/")}>
+            Roadshine Express LLC
+          </h1>
+        </div>
+        <button className="menu-toggle" onClick={toggleMenu}>
+          ☰
+        </button>
+        {user ? (
+          <div className="signin">
+            <p className="signin-username">Hello, {user.first_name}!</p>
+            <button className="signout-button" onClick={handleSignOut}>Sign Out</button>
+          </div>
+        ) : (
+          <button onClick={() => navigate("/signin")}>Sign In</button>
+        )}
+      </header>
       <nav>
         <ul className={`nav-links ${menuOpen ? "active" : ""}`}>
           <li onClick={() => navigate("/")}>Home</li>
+          <li onClick={() => navigate("/about")}>About Us</li>
+          <li onClick={() => navigate("/services")}>Services</li>
+          <li onClick={() => navigate("/contact")}>Contact</li>
           {isUser && (
             <>
               <li onClick={() => navigate("/user")}>Place Order</li>
@@ -50,15 +69,7 @@ const Header = () => {
           )}
         </ul>
       </nav>
-      {user ? (
-        <div className="signin">
-          <p className="signin-username">Hello, {user.first_name}!</p>
-          <button className="signout-button" onClick={handleSignOut}>Sign Out</button>
-        </div>
-      ) : (
-        <button onClick={() => navigate("/signin")}>Sign In</button>
-      )}
-    </header>
+    </>
   );
 };
 
