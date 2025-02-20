@@ -3,34 +3,42 @@
 }
 
 .order-history-container {
-    max-width: 800px;
     margin: 0 auto;
 }
 
-.order-card {
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.order-table th, .order-table td {
     border: 1px solid #ddd;
-    padding: 20px;
-    margin-bottom: 15px;
-    border-radius: 5px;
-    background: white;
+    padding: 8px;
+    text-align: center;
+}
+
+.order-table th {
+    background-color: #f2f2f2;
+    color: black;
+}
+
+.order-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.order-table tr:hover {
+    background-color: #ddd;
+}
+
+.order-table select {
+    padding: 5px;
 }
 
 .order-image {
     max-width: 100%;
     height: auto;
     margin-top: 10px;
-}
-
-.order-items-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 10px;
-}
-
-.order-items-table th, .order-items-table td {
-    border: 1px solid #ccc;
-    padding: 8px;
-    text-align: left;
 }
 
 .tabs {
@@ -52,3 +60,18 @@
     background-color: #007bff;
     color: white;
 }
+
+.print-btn {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    border-radius: 4px;
+  }
+
+  .print-btn:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }

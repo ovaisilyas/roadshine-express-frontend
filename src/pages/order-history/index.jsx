@@ -11,6 +11,7 @@ const OrderHistoryPage = ({ user, setUser }) => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("Active"); // Tabs: Active, Hold, Completed
+  const [selectedItems, setSelectedItems] = useState([]);
 
   useEffect(() => {
     fetchOrderHistory();
@@ -44,20 +45,102 @@ const OrderHistoryPage = ({ user, setUser }) => {
     }
   };
 
+  const toggleItemSelection = (orderItemId) => {
+    setSelectedItems((prevSelected) =>
+      prevSelected.includes(orderItemId)
+        ? prevSelected.filter((id) => id !== orderItemId)
+        : [...prevSelected, orderItemId]
+    );
+  };
+
+  const toggleSelectAll = (items) => {
+    if (selectedItems.length === items.length) {
+      setSelectedItems([]); // Deselect all
+    } else {
+      setSelectedItems(items.map((item) => item.orderitem_id)); // Select all
+    }
+  };
+
+  const handlePrint = () => {
+    const printableItems = orders.flatMap((order) =>
+      order.items
+        .filter((item) => selectedItems.includes(item.orderitem_id))
+        .map((item) => ({
+          category: order.category, // Get category from parent order
+          vin_no: item.vin_no,
+          truck_company: item.truck_company || 'N/A',
+          truck_type: item.truck_type,
+        }))
+    );
+
+    const printContent = `
+      <html>
+        <head>
+          <title>Print Orders</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+            th { background-color: #f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <h2>Selected Orders</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>VIN</th>
+                <th>Truck Company</th>
+                <th>Truck Type</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${printableItems
+                .map(
+                  (item) => `
+                  <tr>
+                    <td>${item.category}</td>
+                    <td>${item.vin_no}</td>
+                    <td>${item.truck_company}</td>
+                    <td>${item.truck_type}</td>
+                  </tr>
+                `
+                )
+                .join("")}
+            </tbody>
+          </table>
+        </body>
+      </html>
+    `;
+
+    const printWindow = window.open("", "_blank");
+    printWindow.document.open();
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    printWindow.print();
+  };
+
+
   const filteredOrders = orders.filter((order) =>
     order.items.some((item) => item.vin_no.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const groupedOrders = filteredOrders.filter((order) => {
-    if (activeTab === "Active") {
-      return ["Pending", "In Progress"].includes(order.status);
-    } else if (activeTab === "Hold") {
-      return ["Hold", "Need Parts", "Truck Not Ready"].includes(order.status);
-    } else if (activeTab === "Completed") {
-      return order.status === "Completed";
-    }
-    return false;
-  });
+  const groupedOrders = filteredOrders
+  .map((order) => ({
+    ...order,
+    items: order.items.filter((item) => {
+      if (activeTab === "Active") {
+        return ["Pending", "In Progress"].includes(item.item_status);
+      } else if (activeTab === "Hold") {
+        return ["Hold", "Need Parts", "Truck Not Ready"].includes(item.item_status);
+      } else if (activeTab === "Completed") {
+        return item.item_status === "Completed";
+      }
+      return false;
+    }),
+  }))
+  .filter((order) => order.items.length > 0); // Only include orders that still have items after filtering
 
   if (loading) return <p>Loading order history...</p>;
   if (error) return <p>{error}</p>;
@@ -76,6 +159,10 @@ const OrderHistoryPage = ({ user, setUser }) => {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
+        <button className="print-btn" onClick={handlePrint} disabled={selectedItems.length === 0}>
+          Print
+        </button>
+
         {/* Tabs for order grouping */}
         <div className="tabs">
           <button className={activeTab === "Active" ? "active" : ""} onClick={() => setActiveTab("Active")}>
@@ -92,54 +179,64 @@ const OrderHistoryPage = ({ user, setUser }) => {
         {groupedOrders.length === 0 ? (
           <p>No orders found.</p>
         ) : (
-          groupedOrders.map((order) => (
-            <div key={order.order_id} className="order-card">
-              <h3>Order ID: {order.order_id}</h3>
-              <p><strong>Category:</strong> {order.category}</p>
-              <p><strong>Status:</strong> <OrderStatus status={order.status} /></p>
-              <p><strong>Order Date:</strong> {new Date(order.order_date).toLocaleDateString()}</p>
-              <p><strong>Total Price:</strong> ${parseFloat(order.totalprice).toFixed(2)}</p>
-              {order.picture_url && <img src={order.picture_url} alt="Order" className="order-image" />}
-              <p><strong>Comment:</strong> {order.comment || "N/A"}</p>
-              <p><strong>Admin Comment:</strong> {order.admin_comment || "N/A"}</p>
-
-              <h4>Order Items:</h4>
-              <table className="order-items-table">
-                <thead>
-                  <tr>
-                    <th>VIN</th>
-                    <th>Truck Company</th>
-                    <th>Truck Type</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Update Status</th>
+          <table className="order-table">
+            <thead>
+              <tr>
+                <th>
+                  <input
+                    type="checkbox"
+                    onChange={() => toggleSelectAll(groupedOrders.flatMap((order) => order.items))}
+                    checked={selectedItems.length > 0 && selectedItems.length === groupedOrders.flatMap((order) => order.items).length}
+                  />
+                </th>
+                <th>Category</th>
+                <th>Order ID</th>
+                <th>Order Date</th>
+                <th>VIN</th>
+                <th>Truck Company</th>
+                <th>Truck Type</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Admin Comment</th>
+                <th>Update Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {groupedOrders.map((order) =>
+                order.items.map((item) => (
+                  <tr key={item.orderitem_id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedItems.includes(item.orderitem_id)}
+                        onChange={() => toggleItemSelection(item.orderitem_id)}
+                      />
+                    </td>
+                    <td>{order.category}</td>
+                    <td>{order.order_id}</td>
+                    <td>{new Date(order.order_date).toLocaleDateString()}</td>
+                    <td>{item.vin_no}</td>
+                    <td>{item.truck_company}</td>
+                    <td>{item.truck_type}</td>
+                    <td>${item.price}</td>
+                    <td><OrderStatus status={item.item_status} /></td>
+                    <td>{order.admin_comment || "N/A"}</td>
+                    <td>
+                      <select
+                        value={item.item_status}
+                        onChange={(e) => updateOrderItemStatus(item.orderitem_id, e.target.value)}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Hold">Hold</option>
+                        <option value="Need Parts">Need Parts</option>
+                        <option value="Truck Not Ready">Truck Not Ready</option>
+                      </select>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {order.items.map((item) => (
-                    <tr key={item.orderitem_id}>
-                      <td>{item.vin_no}</td>
-                      <td>{item.truck_company}</td>
-                      <td>{item.truck_type}</td>
-                      <td>${item.price}</td>
-                      <td><OrderStatus status={item.item_status} /></td>
-                      <td>
-                        <select
-                          value={item.item_status}
-                          onChange={(e) => updateOrderItemStatus(item.orderitem_id, e.target.value)}
-                        >
-                          <option value="Pending">Pending</option>
-                          <option value="Hold">Hold</option>
-                          <option value="Need Parts">Need Parts</option>
-                          <option value="Truck Not Ready">Truck Not Ready</option>
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ))
+                ))
+              )}
+            </tbody>
+          </table>
         )}
       </div>
       <Footer />

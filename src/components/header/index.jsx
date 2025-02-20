@@ -44,7 +44,7 @@ const Header = () => {
               <li onClick={() => navigate("/admin/manage-trucks")}>Manage Trucks</li>
               <li onClick={() => navigate("/admin/manage-users")}>Manage Users</li>
               <li onClick={() => navigate("/admin/manage-orders")}>Manage Orders</li>
-              <li onClick={() => navigate("/admin/invoicing")}>Invoicing</li>
+              <li onClick={() => navigate("/admin/invoice-list")}>Invoicing</li>
               <li onClick={() => navigate("/admin/reports")}>Reports</li>
             </>
           )}

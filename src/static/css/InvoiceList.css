@@ -1,36 +1,58 @@
-.invoice-list {
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-.invoice-header {
-    display: flex;
-    justify-content: space-between;
+.invoice-list-page {
+  padding: 20px;
 }
 
-  .invoice-list h2 {
-    text-align: center;
-    margin-bottom: 20px;
-  }
+.invoice-list-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
 
-  .invoice-list ul {
-    list-style: none;
-    padding: 0;
-  }
+h2 {
+  text-align: center;
+}
 
-  .invoice-list li {
-    margin-bottom: 10px;
-  }
+label {
+  font-weight: bold;
+  margin-right: 10px;
+}
 
-  .invoice-list a {
-    text-decoration: none;
-    color: #007bff;
-  }
+select {
+  padding: 5px;
+  margin-bottom: 15px;
+}
 
-  .invoice-list a:hover {
-    text-decoration: underline;
-    color: #0056b3;
-  }
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.invoice-table th,
+.invoice-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.invoice-table th {
+  background-color: #f4f4f4;
+}
+
+.invoice-table select {
+  padding: 5px;
+}
+
+.invoice-table button {
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.invoice-table button:hover {
+  background-color: #0056b3;
+}

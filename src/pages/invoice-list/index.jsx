@@ -1,55 +1,129 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Footer from "../../components/footer";
-import Header from "../../components/header";
-import "../../static/css/InvoiceList.css"
 import apiClient from "../../utils/ApiClient";
+import Header from "../../components/header";
+import Footer from "../../components/footer";
+import "../../static/css/InvoiceList.css";
 
-const InvoiceList = ({ user, setUser }) => {
+const InvoiceList = ({ user }) => {
   const [invoices, setInvoices] = useState([]);
+  const [filteredInvoices, setFilteredInvoices] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchInvoices = async () => {
-      try {
-        const response = await apiClient.get(`/invoices`);
-        setInvoices(response.data);
-        setLoading(false);
-      } catch (err) {
-        console.error("Error fetching invoices:", err);
-        setError("Failed to fetch invoices.");
-        setLoading(false);
-      }
-    };
-
     fetchInvoices();
   }, []);
 
+  const fetchInvoices = async () => {
+    try {
+      const response = await apiClient.get("/invoices");
+      setInvoices(response.data.invoices);
+      setFilteredInvoices(response.data.invoices);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching invoices:", error);
+      setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (invoiceId, newStatus) => {
+    try {
+      await apiClient.put(`/invoices/${invoiceId}/status`, { status: newStatus });
+      fetchInvoices();
+    } catch (error) {
+      console.error("Error updating invoice status:", error);
+    }
+  };
+
+  const handleFilterChange = (status) => {
+    setSelectedStatus(status);
+    if (status) {
+      setFilteredInvoices(invoices.filter(invoice => invoice.status === status));
+    } else {
+      setFilteredInvoices(invoices);
+    }
+  };
+
+  const handleDownloadInvoice = async (invoiceId) => {
+    try {
+      const response = await apiClient.get(`/invoices/download/${invoiceId}`, {
+          responseType: "blob", // Required to handle binary data
+      });
+
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank"); // Open PDF in a new tab
+
+  } catch (error) {
+      console.error("Error downloading invoice:", error);
+  }
+  };
+
   if (loading) return <p>Loading invoices...</p>;
-  if (error) return <p>{error}</p>;
 
   return (
-    <div className="invoice-list">
-      <Header user={user} setUser={setUser}/>
-      <div className="invoice-header">
-        <h2>Generated Invoices</h2>
-        <button onClick={() => navigate("/admin/invoicing")}>Generate Invoice</button>
+    <div className="invoice-list-page">
+      <Header user={user} />
+      <div className="invoice-list-head">
+        <h2>Invoice List</h2>
+
+        <button onClick={() => navigate("/admin/invoicing")}>
+            Generate Invoice
+        </button>
       </div>
-      {invoices.length === 0 ? (
-        <p>No invoices found.</p>
-      ) : (
-        <ul>
-          {invoices.map((invoice) => (
-            <li key={invoice.name}>
-              <a href={invoice.url} target="_blank" rel="noopener noreferrer" download>
-                {invoice.name}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
+
+      {/* Status Filter */}
+      <label>Filter by Status:</label>
+      <select value={selectedStatus} onChange={(e) => handleFilterChange(e.target.value)}>
+        <option value="">All</option>
+        <option value="Pending">Pending</option>
+        <option value="Sent">Sent</option>
+        <option value="Completed">Completed</option>
+      </select>
+
+      {/* Invoice Table */}
+      <table className="invoice-table">
+        <thead>
+          <tr>
+            <th>Invoice Number</th>
+            <th>Company</th>
+            <th>Truck Category</th>
+            <th>Total Amount</th>
+            <th>Invoice Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredInvoices.length === 0 ? (
+            <tr>
+              <td colSpan="7">No invoices found</td>
+            </tr>
+          ) : (
+            filteredInvoices.map((invoice) => (
+              <tr key={invoice.invoice_id}>
+                <td>{invoice.invoice_number}</td>
+                <td>{invoice.company}</td>
+                <td>{invoice.truck_category}</td>
+                <td>${parseFloat(invoice.total_amount).toFixed(2)}</td>
+                <td>{new Date(invoice.invoice_date).toLocaleDateString()}</td>
+                <td>
+                  <select value={invoice.status} onChange={(e) => handleStatusChange(invoice.invoice_id, e.target.value)}>
+                    <option value="Pending">Pending</option>
+                    <option value="Sent">Sent</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </td>
+                <td>
+                  <button onClick={() => handleDownloadInvoice(invoice.invoice_id)}>Download</button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
       <Footer />
     </div>
   );

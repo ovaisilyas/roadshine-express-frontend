@@ -34,7 +34,7 @@ const UserLandingPage = () => {
     const selCompany = user?.company;
     setSelectedCompany(selCompany);
     fetchTruckCompanies(selCompany);
-    //setIsButtonDisabled(true);
+    setIsButtonDisabled(true);
   }, [user?.company]);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const UserLandingPage = () => {
       try {
           const response = await apiClient.get(`/trucks/truckcompanies?company=${company}`);
           const companies = response.data;
-          console.log(companies);
+          //console.log(companies);
           const distinctCompanies = [...new Set(companies.map((c) => c.truck_company))];
           setTruckCompanies(companies);
           setUniqueTruckCompanies(distinctCompanies);
@@ -67,7 +67,7 @@ const UserLandingPage = () => {
     try {
       const response = await apiClient.get(`/users/active-users`);
       const users = response.data;
-      console.log(users);
+      //console.log(users);
       setActiveUsers(users);
     } catch (error) {
         console.error("Error fetching active users:", error);
@@ -112,12 +112,12 @@ const UserLandingPage = () => {
     }
     if(field === "truck_company") {
       setSelectedTruckCompany(value);
-      console.log(value);
-      console.log(truckCompanies);
+      //console.log(value);
+      //console.log(truckCompanies);
       const types = truckCompanies
         .filter((truck) => truck.truck_company === value)
         .map((truck) => truck.truck_type);
-      console.log(types);
+      //console.log(types);
       setAvailableTruckTypes([...new Set(types)]); // Ensure unique truck types
       setSelectedTruckType(types[0]); // Default to the first truck type
     }
@@ -164,58 +164,11 @@ const UserLandingPage = () => {
     if (vinInput.length > 6) return;
     setVinNumber(vinInput);
     if (vinInput.length === 6 && validateVIN(vinInput)) {
-      //handleVINValidation(vinInput, index);
+      setIsButtonDisabled(false);
     } else if (vinInput.length < 6) {
         setSelectedTruckCompany(""); // Reset fields if invalid
         setIsDropdownDisabled(false); // Allow manual selection
-        //setIsButtonDisabled(true);
-    }
-  };
-
-  const handleVINValidation = async (vin, index) => {
-    try {
-      const response = await apiClient.post(`/orders/validate-vin`, { vin_no: vin });
-      setSelectedCompany(selectedCompany);
-      if (response.data.success) {
-        if(response.data.truck.company !== user?.company) {
-          setError("User's company doesn't match with Truck's company");
-          setSuccess("");
-          setSelectedTruckCompany("");
-          setSelectedTruckType("");
-          setIsDropdownDisabled(false);
-          setIsButtonDisabled(true);
-          return false;
-        } else {
-          setError("");
-          setSuccess("VIN number is valid.");
-          const updatedTruckCompany = response.data.truck.truck_company;
-          const updatedTruckType = response.data.truck.truck_type;
-          handleRowChange(index, "truck_company", updatedTruckCompany);
-          handleRowChange(index, "truck_type", updatedTruckType);
-          setSelectedTruckCompany(updatedTruckCompany);
-          setSelectedTruckType(updatedTruckType);
-          setIsDropdownDisabled(true);
-          setIsButtonDisabled(false);
-          return true;
-        }
-      } else {
-        setError(response.data.error);
-        setSuccess("");
-        setSelectedTruckCompany("");
-        setSelectedTruckType("");
-        setIsDropdownDisabled(false);
-        //setIsButtonDisabled(true);
-        return false;
-      }
-    } catch (error) {
-      console.error('Error validating VIN:', error.response?.data?.message || error.message);
-      setError(error.response?.data?.message || error.message);
-      setSuccess("");
-      setSelectedTruckCompany("");
-      setSelectedTruckType("");
-      setIsDropdownDisabled(false);
-      setIsButtonDisabled(true);
-      return false;
+        setIsButtonDisabled(true);
     }
   };
 
@@ -243,8 +196,13 @@ const UserLandingPage = () => {
   };
 
   const handleFileChange = (e) => {
+    console.log(vinNumber);
     setOrderDetails({ ...orderDetails, picture: e.target.files[0] });
-    setIsButtonDisabled(false);
+    if(e.target.files[0] === undefined && vinNumber === ""){
+      setIsButtonDisabled(true);
+    } else {
+      setIsButtonDisabled(false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -335,7 +293,6 @@ const UserLandingPage = () => {
             {activeUsers.map((user) => (
               <option key={user.users_id} value={user.users_id}>{user.email}</option>
             ))};
-            
           </select></>
           }
           <label>Category:</label>
