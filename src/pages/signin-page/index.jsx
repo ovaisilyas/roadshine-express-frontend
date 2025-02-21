@@ -5,6 +5,7 @@ import Footer from "../../components/footer";
 import "../../static/css/SignInPage.css";
 import { useUser } from "../../UserContext";
 import apiClient from "../../utils/ApiClient";
+import PasswordInput from "../../components/password-input";
 
 const SignInPage = () => {
   const [email, setEmail] = useState("");
@@ -58,7 +59,7 @@ const SignInPage = () => {
             required
           />
           <label>Password</label>
-          <input
+          <PasswordInput
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

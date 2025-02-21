@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "../../static/css/HeroBanner.css";
 import home1 from "../../static/images/home-1.jpg";
 import home2 from "../../static/images/home-2.jpg";
@@ -9,6 +10,7 @@ const HeroBanner = () => {
     home2
   ];
   const [currentIndex, setCurrentIndex] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -32,7 +34,7 @@ const HeroBanner = () => {
       <div class="hero-text">
         <h1>Professional Truck Washing & Detailing</h1>
         <p>Keeping your fleet spotless with cutting-edge technology and exceptional service.</p>
-        <button>Get a Free Quote</button>
+        <button onClick={() => navigate("/contact")}>Get a Free Quote</button>
       </div>
     </div>
   );

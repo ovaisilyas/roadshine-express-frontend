@@ -3,19 +3,20 @@ import Header from "../../components/header";
 import Footer from "../../components/footer";
 import "../../static/css/ReportPage.css";
 import { jsPDF } from "jspdf";
+import "jspdf-autotable";
 import apiClient from "../../utils/ApiClient";
 
 const ReportPage = ({ user, setUser }) => {
-  const [period, setPeriod] = useState(1); // Default to 1 month
-  const [reportData, setReportData] = useState(null);
+  const [period, setPeriod] = useState(1); // Default: 1 month
+  const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [manualExpenses, setManualExpenses] = useState([]);
+  const [manualExpenses, setManualExpenses] = useState({}); // Object { month: expense }
 
   const handleGenerateReport = async () => {
     setLoading(true);
     setError("");
-    console.log(period);
+
     try {
       const response = await apiClient.post("/reports", { period });
       setReportData(response.data);
@@ -27,71 +28,37 @@ const ReportPage = ({ user, setUser }) => {
     }
   };
 
-  // Add a new manual expense field
-  const handleAddExpense = () => {
-    setManualExpenses([...manualExpenses, { name: "", value: "" }]);
+  const handleExpenseChange = (month, value) => {
+    setManualExpenses(prev => ({ ...prev, [month]: parseFloat(value) || 0 }));
   };
 
-  // Remove an expense field
-  const handleRemoveExpense = (index) => {
-    const updatedExpenses = manualExpenses.filter((_, i) => i !== index);
-    setManualExpenses(updatedExpenses);
-  };
-
-  // Update the name or value of an expense
-  const handleExpenseChange = (index, field, value) => {
-    const updatedExpenses = manualExpenses.map((expense, i) =>
-      i === index ? { ...expense, [field]: value } : expense
-    );
-    setManualExpenses(updatedExpenses);
-  };
-
-  // Calculate the total expenses
   const calculateTotalExpenses = () => {
-    const manualTotal = manualExpenses.reduce(
-      (sum, expense) => sum + parseFloat(expense.value || 0),
-      0
-    );
-    return (manualTotal).toFixed(2);
+    return Object.values(manualExpenses).reduce((sum, val) => sum + val, 0).toFixed(2);
   };
 
   const handleExportToPDF = () => {
-    if (!reportData) return;
+    if (!reportData.length) return;
 
     const doc = new jsPDF();
-
-    //Title
     doc.setFontSize(18);
     doc.text("Financial Report", 14, 20);
-
-    //Period
     doc.setFontSize(12);
-    let y = 30;
-    doc.text(`Report Period: ${reportData.period}`, 10, y);
+    doc.text(`Report Period: Last ${period} months`, 10, 30);
 
-    y += 10;
-    doc.text(`Completed Trucks: ${reportData.completedTrucks}`, 10, y);
-    y += 10;
-    // Total Revenue
-    doc.setFontSize(14);
-    doc.text(`Total Revenue: ${reportData.totalRevenue}`, 14, y);
+    const tableData = reportData.map(row => [
+      row.month,
+      `$${row.revenue.toFixed(2)}`,
+      `$${manualExpenses[row.month] || 0}`,
+      `$${(row.revenue - (manualExpenses[row.month] || 0)).toFixed(2)}`
+    ]);
 
-    y += 10;
-
-    // Manual Expenses
-    doc.text("Manual Expenses:", 14, y);
-    manualExpenses.forEach((expense, index) => {
-      doc.text(`${index + 1}. ${expense.name || "Unnamed"} - $${expense.value || 0}`, 14, 70 + index * 10);
+    doc.autoTable({
+      startY: 40,
+      head: [["Month", "Revenue", "Expenses", "Profit/Loss"]],
+      body: tableData
     });
 
-    // Total Expenses
-    doc.setFontSize(14);
-    doc.text(`Total Expenses: $${calculateTotalExpenses()}`, 14, 80 + manualExpenses.length * 10);
-
-    doc.setFontSize(14);
-    doc.text(`Total Profit/Loss: $${parseFloat(reportData.totalRevenue).toFixed(2) - calculateTotalExpenses()}`, 14, 110);
-
-    doc.save(`report_${reportData.period}.pdf`);
+    doc.save(`report_${period}_months.pdf`);
   };
 
   return (
@@ -100,12 +67,8 @@ const ReportPage = ({ user, setUser }) => {
       <main>
         <h1>Generate Report</h1>
         <div className="report-controls">
-          <label htmlFor="period">Select Period:</label>
-          <select
-            id="period"
-            value={period}
-            onChange={(e) => setPeriod(Number(e.target.value))}
-          >
+          <label>Select Period:</label>
+          <select value={period} onChange={(e) => setPeriod(Number(e.target.value))}>
             <option value={1}>1 Month</option>
             <option value={3}>3 Months</option>
             <option value={6}>6 Months</option>
@@ -118,42 +81,45 @@ const ReportPage = ({ user, setUser }) => {
 
         {error && <p className="error">{error}</p>}
 
-        {reportData && (
-          <div className="report-results">
-            <h2>Report</h2>
-            <p><strong>Period:</strong> {reportData.period}</p>
-            <p><strong>Completed Trucks:</strong> {reportData.completedTrucks}</p>
-            <p><strong>Total Revenue:</strong> ${parseFloat(reportData.totalRevenue).toFixed(2)}</p>
-          </div>
-        )}
+        {reportData.length > 0 && (
+          <>
+            <table className="report-table">
+              <thead>
+                <tr>
+                  <th>Month</th>
+                  <th>Revenue</th>
+                  <th>Expenses</th>
+                  <th>Profit/Loss</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reportData.map(({ month, revenue }) => (
+                  <tr key={month}>
+                    <td>{month}</td>
+                    <td>${revenue.toFixed(2)}</td>
+                    <td>
+                      <input
+                        type="number"
+                        value={manualExpenses[month] || ""}
+                        onChange={(e) => handleExpenseChange(month, e.target.value)}
+                        placeholder="Enter expense"
+                      />
+                    </td>
+                    <td>
+                      ${ (revenue - (manualExpenses[month] || 0)).toFixed(2) }
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
 
-        <h3>Manual Expenses</h3>
-        {manualExpenses.map((expense, index) => (
-            <div key={index} className="expense-item">
-            <input
-                type="text"
-                placeholder="Expense Name"
-                value={expense.name}
-                onChange={(e) => handleExpenseChange(index, "name", e.target.value)}
-            />
-            <input
-                type="number"
-                placeholder="Expense Value"
-                value={expense.value}
-                onChange={(e) => handleExpenseChange(index, "value", e.target.value)}
-            />
-            <button onClick={() => handleRemoveExpense(index)}>Remove</button>
-            </div>
-        ))}
-        <button button onClick={handleAddExpense}>Add Expense</button>
-
-        <h3>Total Expenses: ${calculateTotalExpenses()}</h3>
-        {reportData && (
-          <div>
-            <h3>Total Profit/Loss: ${parseFloat(reportData.totalRevenue) - calculateTotalExpenses()}</h3>
-          </div>
+            <h3>Total Expenses: ${calculateTotalExpenses()}</h3>
+            <h3>
+              Total Profit/Loss: ${reportData.reduce((sum, row) => sum + row.revenue, 0) - calculateTotalExpenses()}
+            </h3>
+            <button onClick={handleExportToPDF}>Export to PDF</button>
+          </>
         )}
-        <button onClick={handleExportToPDF}>Export to PDF</button>
       </main>
       <Footer />
     </div>

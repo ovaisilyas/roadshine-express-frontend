@@ -19,20 +19,6 @@ const AdminDashboard = ({ user, setUser }) => {
     <div className="dashboard">
       <Header user={user} setUser={setUser}/>
       <main>
-        <section className="search-section">
-          <h2>Search by VIN</h2>
-          <form onSubmit={handleSearch}>
-            <input
-              type="text"
-              placeholder="Enter VIN number"
-              value={vin}
-              onChange={(e) => setVin(e.target.value)}
-              required
-            />
-            <button type="submit">Search</button>
-          </form>
-        </section>
-
         <section className="links-section">
           <h2>Admin Options</h2>
           <ul>

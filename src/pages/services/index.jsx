@@ -1,10 +1,11 @@
 import React from 'react'
 import Header from '../../components/header'
 import Footer from '../../components/footer'
+import '../../static/css/StaticPages.css'
 
 const Services = ({user, setUser}) => {
   return (
-    <div>
+    <div className='main-static'>
         <Header user={user} setUser={setUser}/>
         <h2>Services</h2>
         <p>Truck Wash Services You Can Count On</p>

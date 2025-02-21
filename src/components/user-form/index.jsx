@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import apiClient from "../../utils/ApiClient";
+import PasswordInput from "../password-input";
 
 const UserForm = ({ user = {}, onSubmit, onCancel }) => {
   const [companies, setCompanies] = useState([]);
@@ -78,7 +79,7 @@ const UserForm = ({ user = {}, onSubmit, onCancel }) => {
         required
       />
       <label>Password</label>
-      <input
+      <PasswordInput
         type="password"
         name="password"
         value={formData.password}

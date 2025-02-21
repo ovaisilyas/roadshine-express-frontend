@@ -1,10 +1,11 @@
 import React from 'react'
 import Header from '../../components/header'
 import Footer from '../../components/footer'
+import '../../static/css/StaticPages.css'
 
 const AboutUs = ({user, setUser}) => {
   return (
-    <div>
+    <div className='main-static'>
         <Header user={user} setUser={setUser}/>
         <h2>About Us</h2>
         <p>RodShine Express LLC: Trusted Expertise & Innovative Solutions</p>
