@@ -27,6 +27,8 @@ const UserLandingPage = () => {
       truck_type: "Day Cab",
       price: 225,
       custom_price: 0,
+      showRewash: false, // Track if "Rewash" should be shown for a row
+      rewashChecked: false,
     },
   ]);
 
@@ -74,6 +76,36 @@ const UserLandingPage = () => {
     }
   };
 
+  const handleVINValidation = async (vin, index) => {
+    if (orderRows[index].rewashChecked) {
+      setError(""); // Clear error when rewash is checked
+      return true;
+    }
+    try {
+      const response = await apiClient.post(`/orders/validate-vin`, { vin_no: vin });
+      if (response.data.success) {
+          setError("");
+          setSuccess("VIN number is valid.");
+          handleRowChange(index, "showRewash", false);
+          setIsButtonDisabled(false);
+          return true;
+      } else {
+        setError(response.data.error);
+        setSuccess("");
+        handleRowChange(index, "showRewash", true);
+        setIsButtonDisabled(true);
+        return false;
+      }
+    } catch (error) {
+      console.error('Error validating VIN:', error.response?.data?.message || error.message);
+      setError(error.response?.data?.message || error.message);
+      setSuccess("");
+      handleRowChange(index, "showRewash", true);
+      setIsButtonDisabled(true);
+      return false;
+    }
+  };
+
   const handleAddRow = () => {
     if(error){
       return;
@@ -87,6 +119,7 @@ const UserLandingPage = () => {
         truck_type: "Day Cab",
         price: 225,
         custom_price: 0,
+        comment: "",
       },
     ]);
   };
@@ -107,6 +140,12 @@ const UserLandingPage = () => {
       setError("");
       setIsButtonDisabled(false);
     }
+    if (field === "rewashChecked" && value === true) {
+      setError(""); // Remove error when rewash is checked
+      setIsButtonDisabled(false);
+    } else if (field === "rewashChecked" && value === false) {
+      handleVINValidation(orderRows[index].vin, index); // Revalidate VIN if unchecked
+    }
     if(field === "vin"){
       handleVINChange(value, index);
     }
@@ -123,6 +162,9 @@ const UserLandingPage = () => {
     }
     if(field === "truck_type") {
       setSelectedTruckType(value);
+    }
+    if(field === "comment" && value === undefined){
+      value = "";
     }
     const updatedRows = [...orderRows];
     updatedRows[index][field] = value;
@@ -163,10 +205,13 @@ const UserLandingPage = () => {
     const vinInput = value.toUpperCase();
     if (vinInput.length > 6) return;
     setVinNumber(vinInput);
+    handleRowChange(index, "rewashChecked", false);
     if (vinInput.length === 6 && validateVIN(vinInput)) {
-      setIsButtonDisabled(false);
+        handleVINValidation(vinInput, index);
+        setIsButtonDisabled(false);
     } else if (vinInput.length < 6) {
-        setSelectedTruckCompany(""); // Reset fields if invalid
+        setError("VIN must be 6 alphanumeric characters.");
+        handleRowChange(index, "showRewash", true);
         setIsDropdownDisabled(false); // Allow manual selection
         setIsButtonDisabled(true);
     }
@@ -207,6 +252,13 @@ const UserLandingPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Check if any row has an error and "Rewash" is unchecked
+    const hasInvalidRows = orderRows.some((row) => row.error && !row.rewashChecked);
+
+    if (hasInvalidRows) {
+      alert("Please resolve VIN errors or select 'Rewash' for affected rows.");
+      return;
+    }
     try {
       const formData = new FormData();
       formData.append("user_id", isAdmin ? orderDetails.userId : user?.users_id);
@@ -220,9 +272,6 @@ const UserLandingPage = () => {
       if (orderDetails.customOrder) {
         formData.append("custom_order", orderDetails.customOrder);
       }
-      if (orderDetails.comment) {
-        formData.append("comment", orderDetails.comment);
-      }
       if (orderDetails.picture) {
         formData.append("picture", orderDetails.picture);
       }
@@ -235,6 +284,7 @@ const UserLandingPage = () => {
         formData.append(`orders[${index}][truck_type]`, orderDetails.category === "Used" ? orderDetails.truck_type : row.truck_type);
         formData.append(`orders[${index}][price]`, orderDetails.category === "Used" ? orderDetails.price : row.price);
         formData.append(`orders[${index}][custom_price]`, orderDetails.category === "Used" ? orderDetails.custom_price : row.custom_price);
+        formData.append(`orders[${index}][comment]`, orderDetails.category === "Used" ? orderDetails.comment : row.comment);
         formData.append(`orders[${index}][company]`, selectedCompany);
       });
 
@@ -314,9 +364,31 @@ const UserLandingPage = () => {
                     placeholder="VIN"
                     value={row.vin}
                     maxLength={6}
+                    className="input-row"
                     onChange={(e) => handleRowChange(index, "vin", e.target.value)}
                   />
+                  {(error && row.showRewash) && (
+                    <div className="rewash-container">
+                      <input
+                        type="checkbox"
+                        id={`rewash-${index}`}
+                        checked={row.rewashChecked}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          handleRowChange(index, "rewashChecked", checked);
+
+                          if (checked) {
+                            setError(""); // Remove error when rewash is checked
+                          } else {
+                            handleVINValidation(row.vin, index); // Revalidate VIN if unchecked
+                          }
+                        }}
+                      />
+                      <label htmlFor={`rewash-${index}`}>Rewash (Bypass VIN validation)</label>
+                    </div>
+                  )}
                   <input
+                    className="input-row"
                     type="text"
                     placeholder="Date"
                     value={row.date}
@@ -343,6 +415,7 @@ const UserLandingPage = () => {
                   </select>
                   <input
                     type="number"
+                    className="input-row"
                     placeholder="Price"
                     value={row.price}
                     onChange={(e) => handleRowChange(index, "price", e.target.value)}
@@ -350,9 +423,15 @@ const UserLandingPage = () => {
                   />
                   <input
                     type="number"
+                    className="input-row"
                     placeholder="Custom Price"
                     value={row.custom_price}
                     onChange={(e) => handleRowChange(index, "custom_price", e.target.value)}
+                  />
+                  <textarea
+                      placeholder="Add a comment..."
+                      className="comment-row"
+                      onChange={(e) => handleRowChange(index, "comment", e.target.value)}
                   />
                   <select
                     value={row.company}
@@ -434,7 +513,7 @@ const UserLandingPage = () => {
                     <option value="Quick Wash">Quick Wash - $300</option>
                     <option value="Custom Order">Custom Order</option>
                   </select>
-                  {orderDetails.washType === "custom order" && (
+                  {orderDetails.washType === "Custom Order" && (
                     <textarea
                       name="customOrder"
                       placeholder="Describe your custom order"
@@ -461,6 +540,15 @@ const UserLandingPage = () => {
                     placeholder="Custom Price"
                     value={orderDetails.custom_price}
                     onChange={handleInputChange}
+                  />
+                </div>
+                <div>
+                  <label>Comment:</label>
+                  <textarea
+                      name="comment"
+                      placeholder="Add a comment..."
+                      value={orderDetails.comment}
+                      onChange={handleInputChange}
                   />
                 </div>
                 <div>

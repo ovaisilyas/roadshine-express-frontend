@@ -94,13 +94,9 @@ const UserForm = ({ user = {}, onSubmit, onCancel }) => {
           ))}
       </select>
       <label>Organization</label>
-      <input
-        type="text"
-        name="organization"
-        value={formData.organization}
-        onChange={handleChange}
-        required
-      />
+      <select value={formData.organization} name="organization" onChange={handleChange} required>
+          <option value="RoadShineExpress">RoadShine Express LLC</option>
+      </select>
       <label>Status</label>
       <select
         name="status"

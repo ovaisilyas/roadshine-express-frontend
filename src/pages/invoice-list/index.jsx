@@ -56,9 +56,17 @@ const InvoiceList = ({ user }) => {
       const url = window.URL.createObjectURL(blob);
       window.open(url, "_blank"); // Open PDF in a new tab
 
-  } catch (error) {
-      console.error("Error downloading invoice:", error);
-  }
+    } catch (error) {
+        console.error("Error downloading invoice:", error);
+    }
+  };
+
+  const handleSendInvoice = async (invoiceId) => {
+    try {
+      await apiClient.post(`/invoices/send-invoice/${invoiceId}`);
+    } catch (error) {
+        console.error("Error sending invoice:", error);
+    }
   };
 
   if (loading) return <p>Loading invoices...</p>;
@@ -81,6 +89,7 @@ const InvoiceList = ({ user }) => {
         <option value="Pending">Pending</option>
         <option value="Sent">Sent</option>
         <option value="Completed">Completed</option>
+        <option value="Paid">Paid</option>
       </select>
 
       {/* Invoice Table */}
@@ -118,6 +127,7 @@ const InvoiceList = ({ user }) => {
                 </td>
                 <td>
                   <button onClick={() => handleDownloadInvoice(invoice.invoice_id)}>Download</button>
+                  <button onClick={() => handleSendInvoice(invoice.invoice_id)}>Send Email</button>
                 </td>
               </tr>
             ))

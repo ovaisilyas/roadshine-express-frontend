@@ -24,7 +24,7 @@ const LandingPage = ({ user, setUser }) => {
           <h2>Contact Us</h2>
           <p>Reach out to us for bookings and inquiries:</p>
           <p>Email: roadshineexpress@gmail.com</p>
-          <p>Phone: (123) 456-7890</p>
+          <p>Phone: (615) 397-7418</p>
       </div>
       <div className="section">
         <h2>What We Do:</h2>

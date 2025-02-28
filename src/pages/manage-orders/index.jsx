@@ -5,6 +5,7 @@ import Header from "../../components/header";
 import "../../static/css/ManageOrders.css";
 import apiClient from "../../utils/ApiClient";
 import OrderStatus from "../../components/order-status";
+import EditOrderItemModal from "../../components/edit-order";
 
 const ManageOrders = ({ user, setUser }) => {
   const [orders, setOrders] = useState([]);
@@ -14,6 +15,24 @@ const ManageOrders = ({ user, setUser }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("Active");
   const [selectedItems, setSelectedItems] = useState([]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedOrderItem, setSelectedOrderItem] = useState(null);
+
+  console.log(user?.company);
+
+  const openModal = (order, orderItem) => {
+    setSelectedOrder(order);
+    setSelectedOrderItem(orderItem);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedOrder(null);
+    setSelectedOrderItem(null);
+  };
 
   const toggleItemSelection = (orderItemId) => {
     setSelectedItems((prevSelected) =>
@@ -100,9 +119,9 @@ const ManageOrders = ({ user, setUser }) => {
     ...order,
     items: order.items.filter((item) => {
       if (activeTab === "Active") {
-        return ["Pending", "In Progress"].includes(item.item_status);
+        return ["Pending", "In Progress", "Urgent"].includes(item.item_status);
       } else if (activeTab === "Hold") {
-        return ["Hold", "Need Parts", "Truck Not Ready"].includes(item.item_status);
+        return ["Hold", "Truck Not Found", "Truck Not Ready"].includes(item.item_status);
       } else if (activeTab === "Completed") {
         return item.item_status === "Completed";
       }
@@ -128,9 +147,19 @@ const ManageOrders = ({ user, setUser }) => {
   const handleUpdateOrder = async (orderId) => {
     try {
       await apiClient.put(`/orders/${orderId}`, { status, admin_comment: comment });
+      setStatus(status);
       fetchOrders();
     } catch (error) {
       console.error("Error updating order:", error);
+    }
+  };
+
+  const handleDeleteOrderItem = async (orderItemId) => {
+    try {
+      await apiClient.delete(`/orders/${orderItemId}`);
+      fetchOrders();
+    } catch (error) {
+      console.error("Error deleteing order item:", error);
     }
   };
 
@@ -208,9 +237,10 @@ const ManageOrders = ({ user, setUser }) => {
                     <th>Price</th>
                     <th>Picture</th>
                     <th>Status</th>
+                    <th>Comment</th>
                     <th>Admin Comment</th>
                     <th>Update Status</th>
-                    <th></th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -236,26 +266,33 @@ const ManageOrders = ({ user, setUser }) => {
                         <td>${item.price}</td>
                         <td>{order.picture_url && <img src={order.picture_url} alt="Order" className="order-image" />}</td>
                         <td><OrderStatus status={item.item_status} /></td>
+                        <td>{item.comment || "N/A"}</td>
                         <td>{order.admin_comment || "N/A"}<textarea
                               placeholder="Add an admin comment..."
                               name={`admin_comment_${item.orderitem_id}`}
                               onChange={(e) => setComment(e.target.value)}
-                          /></td>
+                          />
+                          <button className="update-btn" onClick={() => handleUpdateOrder(order.order_id)}>Update Comment</button>
+                        </td>
                         <td>
                           <select
                             value={item.item_status}
                             onChange={(e) => updateOrderItemStatus(item.orderitem_id, e.target.value)}
                           >
                             <option value="Pending">Pending</option>
+                            <option value="Urgent">Urgent</option>
                             <option value="In Progress">In Progress</option>
                             <option value="Completed">Completed</option>
                             <option value="Hold">Hold</option>
-                            <option value="Need Parts">Need Parts</option>
+                            <option value="Truck Not Found">Truck Not Found</option>
                             <option value="Truck Not Ready">Truck Not Ready</option>
                             <option value="Invoiced">Invoiced</option>
                           </select>
                         </td>
-                        <td><button className="update-btn" onClick={() => handleUpdateOrder(order.order_id)}>Update Comment</button></td>
+                        <td>
+                          <button className="edit-btn" onClick={() => openModal(order, item)}>Edit</button>
+                          <button className="delete-btn" onClick={() => handleDeleteOrderItem(item.orderitem_id)}>Delete</button>
+                        </td>
                       </tr>
                     ))
                   )}
@@ -263,6 +300,15 @@ const ManageOrders = ({ user, setUser }) => {
               </table>
             )}
         </div>
+        {/* Edit Order Item Modal */}
+        <EditOrderItemModal
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          orderItem={selectedOrderItem}
+          order={selectedOrder}
+          company={user?.company}
+          refreshOrders={fetchOrders}
+        />
       <Footer />
     </div>
   );

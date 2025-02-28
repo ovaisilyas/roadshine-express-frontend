@@ -55,7 +55,7 @@ const InvoicePage = ({ user }) => {
         truck_companies: selectedTruckCompanies,
       };
 
-      const response = await apiClient.post("/invoices/generate", payload);
+      await apiClient.post("/invoices/generate", payload);
       alert("Invoice generated successfully!");
       navigate("/admin/invoice-list");
     } catch (error) {

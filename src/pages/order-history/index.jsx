@@ -4,6 +4,7 @@ import Header from "../../components/header";
 import Footer from "../../components/footer";
 import "../../static/css/OrderHistory.css";
 import OrderStatus from "../../components/order-status";
+import EditOrderItemModal from "../../components/edit-order";
 
 const OrderHistoryPage = ({ user, setUser }) => {
   const [orders, setOrders] = useState([]);
@@ -12,6 +13,10 @@ const OrderHistoryPage = ({ user, setUser }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("Active"); // Tabs: Active, Hold, Completed
   const [selectedItems, setSelectedItems] = useState([]);
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedOrderItem, setSelectedOrderItem] = useState(null);
 
   useEffect(() => {
     fetchOrderHistory();
@@ -27,6 +32,18 @@ const OrderHistoryPage = ({ user, setUser }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const openModal = (order, orderItem) => {
+    setSelectedOrder(order);
+    setSelectedOrderItem(orderItem);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedOrder(null);
+    setSelectedOrderItem(null);
   };
 
   const updateOrderItemStatus = async (orderItemId, newStatus) => {
@@ -123,7 +140,7 @@ const OrderHistoryPage = ({ user, setUser }) => {
 
 
   const filteredOrders = orders.filter((order) =>
-    order.items.some((item) => item.vin_no.toLowerCase().includes(searchTerm.toLowerCase()))
+    order.items.some((item) => item.vin_no !== null ? item.vin_no.toLowerCase().includes(searchTerm.toLowerCase()) : item.vin_no)
   );
 
   const groupedOrders = filteredOrders
@@ -131,9 +148,9 @@ const OrderHistoryPage = ({ user, setUser }) => {
     ...order,
     items: order.items.filter((item) => {
       if (activeTab === "Active") {
-        return ["Pending", "In Progress"].includes(item.item_status);
+        return ["Pending", "In Progress", "Urgent"].includes(item.item_status);
       } else if (activeTab === "Hold") {
-        return ["Hold", "Need Parts", "Truck Not Ready"].includes(item.item_status);
+        return ["Hold", "Truck Not Found", "Truck Not Ready"].includes(item.item_status);
       } else if (activeTab === "Completed") {
         return item.item_status === "Completed";
       }
@@ -149,7 +166,7 @@ const OrderHistoryPage = ({ user, setUser }) => {
     <div className="order-history-page">
       <Header user={user} setUser={setUser} />
       <div className="order-history-container">
-        <h2>Order History</h2>
+        <h2>Orders</h2>
 
         {/* Search by VIN */}
         <input
@@ -197,8 +214,10 @@ const OrderHistoryPage = ({ user, setUser }) => {
                 <th>Truck Type</th>
                 <th>Price</th>
                 <th>Status</th>
+                <th>Comment</th>
                 <th>Admin Comment</th>
                 <th>Update Status</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -220,6 +239,7 @@ const OrderHistoryPage = ({ user, setUser }) => {
                     <td>{item.truck_type}</td>
                     <td>${item.price}</td>
                     <td><OrderStatus status={item.item_status} /></td>
+                    <td>{item.comment || "N/A"}</td>
                     <td>{order.admin_comment || "N/A"}</td>
                     <td>
                       <select
@@ -227,10 +247,14 @@ const OrderHistoryPage = ({ user, setUser }) => {
                         onChange={(e) => updateOrderItemStatus(item.orderitem_id, e.target.value)}
                       >
                         <option value="Pending">Pending</option>
+                        <option value="Urgent">Urgent</option>
                         <option value="Hold">Hold</option>
-                        <option value="Need Parts">Need Parts</option>
+                        <option value="Truck Not Found">Truck Not Found</option>
                         <option value="Truck Not Ready">Truck Not Ready</option>
                       </select>
+                    </td>
+                    <td>
+                      <button className="edit-btn" onClick={() => openModal(order, item)}>Edit</button>
                     </td>
                   </tr>
                 ))
@@ -239,6 +263,15 @@ const OrderHistoryPage = ({ user, setUser }) => {
           </table>
         )}
       </div>
+      {/* Edit Order Item Modal */}
+      <EditOrderItemModal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        orderItem={selectedOrderItem}
+        order={selectedOrder}
+        company={user?.company}
+        refreshOrders={fetchOrderHistory}
+      />
       <Footer />
     </div>
   );

@@ -32,9 +32,24 @@ const HeroBanner = () => {
         ))}
       </div>
       <div class="hero-text">
-        <h1>Professional Truck Washing & Detailing</h1>
-        <p>Keeping your fleet spotless with cutting-edge technology and exceptional service.</p>
-        <button onClick={() => navigate("/contact")}>Get a Free Quote</button>
+        <h1 className="hero-heading">🚛 Professional Truck Washing & Detailing You Can Trust</h1>
+        <p>At Roadshine Express LLC, we deliver unmatched fleet care using cutting-edge technology
+          and premium products—ensuring your trucks shine inside and out.
+        </p>
+        <br/>
+        <h2 className="hero-h2">💪 Why Choose Us?</h2>
+        <p>✔ Spotless Exterior Cleaning: Dirt, grime, and road salt—gone.</p>
+        <p>✔ Interior Detailing: Disinfected, sanitized, and load-ready.</p>
+        <p>✔ Fleet Maintenance Plans: Flexible packages for peak performance.</p>
+        <p>✔ Polishing & Detailing: Aluminum, tires, and bug removal—flawless finish.</p>
+        <br/>
+        <h2>🚀 Experience the Roadshine Difference:</h2>
+        <p>⚡ Fast & Reliable: Trucks back on the road—showroom-ready.</p>
+        <p>🌿 Eco-Friendly: Powerful cleaning, planet-safe.</p>
+        <p>📅 Easy Booking: Schedule in seconds—zero wait time.</p>
+        <br/>
+        <h2>✨ Keep Your Fleet Shining!</h2>
+        <p>👉 <button onClick={() => navigate("/contact")}>Get a Free Quote Now</button> and see the Roadshine standard in action!</p>
       </div>
     </div>
   );

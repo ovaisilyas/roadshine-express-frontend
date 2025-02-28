@@ -1,19 +1,11 @@
-import React, {useState} from "react";
+import React from "react";
 import { useNavigate } from "react-router-dom";
 import Footer from "../../components/footer";
 import Header from "../../components/header";
 import "../../static/css/AdminDashboard.css";
 
 const AdminDashboard = ({ user, setUser }) => {
-    const [vin, setVin] = useState("");
     const navigate = useNavigate();
-
-    const handleSearch = (e) => {
-      e.preventDefault();
-      // Navigate to search results page or fetch data
-      console.log(`Searching for VIN: ${vin}`);
-      alert(`Searching for VIN: ${vin}`);
-    };
 
   return (
     <div className="dashboard">

@@ -33,7 +33,6 @@ textarea {
   border: 1px solid #ccc;
   border-radius: 5px;
   font-size: 1rem;
-  width: 100%;
 }
 
 button {
@@ -68,6 +67,7 @@ button:disabled {
   gap: 10px;
   margin-bottom: 10px;
   align-items: center;
+  width: 100%;
 }
 
 .order-row input,
@@ -107,4 +107,28 @@ button:disabled {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+}
+
+.comment-row {
+  width: 15%;
+  height: 15%;
+}
+
+.input-row {
+  width: 10%;
+}
+
+.rewash-container {
+  margin-top: 10px;
+}
+
+.rewash-container input {
+  margin-right: 5px;
+  cursor: pointer;
+}
+
+.rewash-container label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
 }

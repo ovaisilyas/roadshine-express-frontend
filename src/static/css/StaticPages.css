@@ -2,3 +2,32 @@
     margin: auto;
     padding: 20px;
 }
+
+.services-body {
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+.services-body p {
+    text-align: left;
+}
+
+.services-body h2{
+    text-align: left;
+}
+
+.services-body h3{
+    text-align: left;
+}
+
+.aboutus-body p {
+    text-align: left;
+}
+
+.aboutus-body h2 {
+    text-align: left;
+}
+
+.aboutus-body h3 {
+    text-align: left;
+}

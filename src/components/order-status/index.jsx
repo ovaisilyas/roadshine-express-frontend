@@ -8,12 +8,14 @@ const OrderStatus = ({ status }) => {
         return { color: "blue", displayText: "Pending" };
       case "Completed":
         return { color: "green", displayText: "Completed" };
+      case "Urgent":
+        return { color: "purple", displayText: "Urgent" };
       case "In Progress":
         return { color: "orange", displayText: "In Progress" };
       case "Hold":
         return { color: "red", displayText: "Hold" };
-      case "Need Parts":
-        return { color: "yellow", displayText: "Not Found" }; // Custom display text
+      case "Truck Not Found":
+        return { color: "yellow", displayText: "Truck Not Found" };
       case "Truck not ready":
         return { color: "red", displayText: "Truck not ready" };
       default:
