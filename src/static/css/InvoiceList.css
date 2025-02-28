@@ -46,7 +46,6 @@ select {
 
 .invoice-table button {
   padding: 5px 10px;
-  background-color: #007bff;
   color: white;
   border: none;
   cursor: pointer;
@@ -55,4 +54,8 @@ select {
 
 .invoice-table button:hover {
   background-color: #0056b3;
+}
+
+.delete-btn {
+  background-color: #dc3545;
 }

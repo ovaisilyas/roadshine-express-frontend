@@ -17,6 +17,7 @@ import ManageTruckCompanies from "./pages/manage-truck-companies";
 import Services from "./pages/services";
 import AboutUs from "./pages/aboutus";
 import ContactUs from "./pages/contactus";
+import ExpensePage from "./pages/expenses";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -47,6 +48,7 @@ const App = () => {
         <Route path="/admin/invoice-list" element={<ProtectedRoute><InvoiceList user={user} setUser={setUser}/></ProtectedRoute>} />
         <Route path="/admin/invoicing" element={<ProtectedRoute><Invoicing user={user} setUser={setUser}/></ProtectedRoute>} />
         <Route path="/admin/reports" element={<ProtectedRoute><Reports user={user} setUser={setUser}/></ProtectedRoute>} />
+        <Route path="/admin/reports/expenses" element={<ProtectedRoute><ExpensePage user={user} setUser={setUser}/></ProtectedRoute>} />
       </Routes>
     </Router>
   );

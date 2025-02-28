@@ -69,6 +69,17 @@ const InvoiceList = ({ user }) => {
     }
   };
 
+  const handleDeleteInvoice = async (invoiceId) => {
+    try {
+
+      await apiClient.delete(`/invoices/${invoiceId}`);
+      alert("Invoice deleted successfully!");
+      fetchInvoices();
+    } catch (error) {
+      alert(error.response.data.message);
+    }
+  };
+
   if (loading) return <p>Loading invoices...</p>;
 
   return (
@@ -128,6 +139,7 @@ const InvoiceList = ({ user }) => {
                 <td>
                   <button onClick={() => handleDownloadInvoice(invoice.invoice_id)}>Download</button>
                   <button onClick={() => handleSendInvoice(invoice.invoice_id)}>Send Email</button>
+                  <button className="delete-btn" onClick={() => handleDeleteInvoice(invoice.invoice_id)}>Delete</button>
                 </td>
               </tr>
             ))

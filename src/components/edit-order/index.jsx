@@ -48,24 +48,25 @@ const EditOrderItemModal = ({ isOpen, onClose, orderItem, order, company, refres
       }, [isOpen, onClose]);
 
     useEffect(() => {
-        fetchTruckCompanies();
-      }, []);
-
-    const fetchTruckCompanies = async () => {
-        if(company === "") {
-            return;
-        }
-        try {
-            const response = await apiClient.get(`/trucks/truckcompanies?company=${company}`);
-            const companies = response.data;
-            setTruckCompanies(companies);
-            const distinctCompanies = [...new Set(companies.map((c) => c.truck_company))];
-            setUniqueTruckCompanies(distinctCompanies);
-        } catch (error) {
-            console.error("Error fetching truck companies:", error);
+        const fetchTruckCompanies = async () => {
+            if(company === "") {
+                return;
+            }
+            try {
+                const response = await apiClient.get(`/trucks/truckcompanies?company=${company}`);
+                const companies = response.data;
+                setTruckCompanies(companies);
+                const distinctCompanies = [...new Set(companies.map((c) => c.truck_company))];
+                setUniqueTruckCompanies(distinctCompanies);
+            } catch (error) {
+                console.error("Error fetching truck companies:", error);
+            }
         }
 
-    };
+        if(company){
+            fetchTruckCompanies();
+        }
+      }, [company]);
 
     const handleTruckCompanyChange = (value) => {
         const types = truckCompanies

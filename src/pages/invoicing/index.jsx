@@ -42,9 +42,13 @@ const InvoicePage = ({ user }) => {
     }
   };
 
-  const handleTruckCompanyChange = (e) => {
-    setSelectedTruckCompanies([...e.target.selectedOptions].map(opt => opt.value));
-  }
+  const handleTruckCompanyChange = (e, company) => {
+    setSelectedTruckCompanies((prevSelected) =>
+      e.target.checked
+        ? [...prevSelected, company] // ✅ Add if checked
+        : prevSelected.filter((c) => c !== company) // ❌ Remove if unchecked
+    );
+  };
 
   const handleGenerateInvoice = async () => {
     try {
@@ -59,8 +63,8 @@ const InvoicePage = ({ user }) => {
       alert("Invoice generated successfully!");
       navigate("/admin/invoice-list");
     } catch (error) {
+      alert(error.response.data.message);
       setErrorMessage(error.response.data.message);
-      console.error("Error generating invoice:", error);
     }
   };
 
@@ -101,12 +105,23 @@ const InvoicePage = ({ user }) => {
           ))}
         </select>
 
-        <label>Truck Companies:</label>
-        <select multiple value={selectedTruckCompanies} onChange={(e) => handleTruckCompanyChange(e)}>
-          {uniqueTruckCompanies.map((company) => (
-            <option key={company} value={company}>{company}</option>
-          ))}
-        </select>
+        <div className="checkbox-container">
+          <label>Truck Companies:</label>
+          <div className="checkbox-group">
+            {uniqueTruckCompanies.map((company) => (
+              <div key={company} className="checkbox-label">
+                <input
+                  type="checkbox"
+                  id={`company-${company}`}
+                  value={company}
+                  checked={selectedTruckCompanies.includes(company)}
+                  onChange={(e) => handleTruckCompanyChange(e, company)}
+                />
+                <label htmlFor={`company-${company}`}>{company}</label>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <button onClick={handleGenerateInvoice}>Generate Invoice</button>
       </div>

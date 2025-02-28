@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../../components/header";
 import Footer from "../../components/footer";
 import "../../static/css/ReportPage.css";
@@ -11,7 +12,7 @@ const ReportPage = ({ user, setUser }) => {
   const [reportData, setReportData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [manualExpenses, setManualExpenses] = useState({}); // Object { month: expense }
+  const navigate = useNavigate();
 
   const handleGenerateReport = async () => {
     setLoading(true);
@@ -28,14 +29,6 @@ const ReportPage = ({ user, setUser }) => {
     }
   };
 
-  const handleExpenseChange = (month, value) => {
-    setManualExpenses(prev => ({ ...prev, [month]: parseFloat(value) || 0 }));
-  };
-
-  const calculateTotalExpenses = () => {
-    return Object.values(manualExpenses).reduce((sum, val) => sum + val, 0).toFixed(2);
-  };
-
   const handleExportToPDF = () => {
     if (!reportData.length) return;
 
@@ -48,8 +41,8 @@ const ReportPage = ({ user, setUser }) => {
     const tableData = reportData.map(row => [
       row.month,
       `$${row.revenue.toFixed(2)}`,
-      `$${manualExpenses[row.month] || 0}`,
-      `$${(row.revenue - (manualExpenses[row.month] || 0)).toFixed(2)}`
+      `$${row.expenses || 0}`,
+      `$${(row.revenue - (row.expenses || 0)).toFixed(2)}`
     ]);
 
     doc.autoTable({
@@ -66,6 +59,9 @@ const ReportPage = ({ user, setUser }) => {
       <Header user={user} setUser={setUser} />
       <main>
         <h1>Generate Report</h1>
+        <button onClick={() => navigate("/admin/reports/expenses")} className="expense-btn">
+            Manage Expenses
+        </button>
         <div className="report-controls">
           <label>Select Period:</label>
           <select value={period} onChange={(e) => setPeriod(Number(e.target.value))}>
@@ -93,29 +89,19 @@ const ReportPage = ({ user, setUser }) => {
                 </tr>
               </thead>
               <tbody>
-                {reportData.map(({ month, revenue }) => (
+                {reportData.map(({ month, revenue, expenses, profitLoss }) => (
                   <tr key={month}>
-                    <td>{month}</td>
-                    <td>${revenue.toFixed(2)}</td>
-                    <td>
-                      <input
-                        type="number"
-                        value={manualExpenses[month] || ""}
-                        onChange={(e) => handleExpenseChange(month, e.target.value)}
-                        placeholder="Enter expense"
-                      />
-                    </td>
-                    <td>
-                      ${ (revenue - (manualExpenses[month] || 0)).toFixed(2) }
-                    </td>
+                      <td>{month}</td>
+                      <td>${revenue.toFixed(2)}</td>
+                      <td>${expenses.toFixed(2)}</td>
+                      <td>${profitLoss.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
 
-            <h3>Total Expenses: ${calculateTotalExpenses()}</h3>
             <h3>
-              Total Profit/Loss: ${reportData.reduce((sum, row) => sum + row.revenue, 0) - calculateTotalExpenses()}
+                Total Profit/Loss: ${reportData.reduce((sum, row) => sum + row.profitLoss, 0).toFixed(2)}
             </h3>
             <button onClick={handleExportToPDF}>Export to PDF</button>
           </>

@@ -19,3 +19,27 @@
     margin: auto;
     margin-bottom: 15px;
 }
+
+.checkbox-container {
+    margin: 10px 0;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap; /* Allows wrapping if there are many checkboxes */
+    gap: 10px; /* Spacing between checkboxes */
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center; /* Aligns checkbox with text */
+    gap: 5px; /* Space between checkbox and text */
+}
+
+.checkbox-label label {
+    margin-top: 0px;
+}
+
+.checkbox-label input {
+    margin-bottom: 0px;
+}
