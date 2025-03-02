@@ -26,7 +26,7 @@ const SignInPage = () => {
           localStorage.setItem("authToken", token);
           if(user.role === 'User'){
             navigate("/user");
-          } else if(user.role === 'Administrator'){
+          } else if(user.role === 'Administrator' || user.role === 'Employee'){
             navigate("/admin");
           } else {
             // Redirect to the landing page

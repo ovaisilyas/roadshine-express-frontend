@@ -8,7 +8,7 @@ const ProtectedRoute = ({ children }) => {
   if (!user) {
     return <Navigate to="/signin" replace />;
   }
-  if (user.role !== "Administrator") {
+  if (user.role !== "Administrator" && user.role !== "Employee") {
     return <Navigate to="/" replace />; // Redirect to home or login page
   }
 

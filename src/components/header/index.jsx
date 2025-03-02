@@ -10,6 +10,7 @@ const Header = () => {
   const navigate = useNavigate();
 
   const isAdmin = user?.role === "Administrator";
+  const isEmployee = user?.role === "Employee";
   const isUser = user?.role === "User";
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
@@ -62,6 +63,14 @@ const Header = () => {
               <li onClick={() => navigate("/admin/manage-orders")}>Manage Orders</li>
               <li onClick={() => navigate("/admin/invoice-list")}>Invoicing</li>
               <li onClick={() => navigate("/admin/reports")}>Reports</li>
+            </>
+          )}
+          {isEmployee && (
+            <>
+              <li onClick={() => navigate("/admin")}>Dashboard</li>
+              <li onClick={() => navigate("/admin/manage-truck-companies")}>Manage Truck Companies</li>
+              <li onClick={() => navigate("/admin/manage-trucks")}>Manage Trucks</li>
+              <li onClick={() => navigate("/admin/manage-orders")}>Manage Orders</li>
             </>
           )}
         </ul>

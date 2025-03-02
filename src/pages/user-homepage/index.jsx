@@ -10,6 +10,7 @@ import TruckImage from "../../components/truck-image";
 const UserLandingPage = () => {
   const { user, setUser } = useUser();
   const isAdmin = user?.role === "Administrator";
+  const isEmployee = user?.role === "Employee";
   //const navigate = useNavigate();
   const [isDropdownDisabled, setIsDropdownDisabled] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
@@ -41,10 +42,10 @@ const UserLandingPage = () => {
   }, [user?.company]);
 
   useEffect(() => {
-    if(isAdmin){
+    if(isAdmin || isEmployee){
       fetchAllActiveUsers();
     }
-  }, [isAdmin]);
+  }, [isAdmin, isEmployee]);
 
   const fetchTruckCompanies = async (company) => {
       if(company === "") {
