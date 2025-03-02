@@ -27,8 +27,9 @@ const UserLandingPage = () => {
       truck_type: "Day Cab",
       price: 225,
       custom_price: 0,
-      showRewash: false, // Track if "Rewash" should be shown for a row
-      rewashChecked: false,
+      error: "",
+      showRewash: false,
+      rewash: false,
     },
   ]);
 
@@ -55,7 +56,6 @@ const UserLandingPage = () => {
       try {
           const response = await apiClient.get(`/trucks/truckcompanies?company=${company}`);
           const companies = response.data;
-          //console.log(companies);
           const distinctCompanies = [...new Set(companies.map((c) => c.truck_company))];
           setTruckCompanies(companies);
           setUniqueTruckCompanies(distinctCompanies);
@@ -69,7 +69,6 @@ const UserLandingPage = () => {
     try {
       const response = await apiClient.get(`/users/active-users`);
       const users = response.data;
-      //console.log(users);
       setActiveUsers(users);
     } catch (error) {
         console.error("Error fetching active users:", error);
@@ -77,33 +76,45 @@ const UserLandingPage = () => {
   };
 
   const handleVINValidation = async (vin, index) => {
-    if (orderRows[index].rewashChecked) {
-      setError(""); // Clear error when rewash is checked
-      return true;
-    }
     try {
       const response = await apiClient.post(`/orders/validate-vin`, { vin_no: vin });
       if (response.data.success) {
           setError("");
           setSuccess("VIN number is valid.");
-          handleRowChange(index, "showRewash", false);
+          updateRow(index, { error: "", rewash: false, showRewash: false });
           setIsButtonDisabled(false);
           return true;
-      } else {
-        setError(response.data.error);
-        setSuccess("");
-        handleRowChange(index, "showRewash", true);
-        setIsButtonDisabled(true);
-        return false;
       }
     } catch (error) {
-      console.error('Error validating VIN:', error.response?.data?.message || error.message);
-      setError(error.response?.data?.message || error.message);
-      setSuccess("");
-      handleRowChange(index, "showRewash", true);
-      setIsButtonDisabled(true);
+      if (error.response?.status === 404) {
+          console.log(`❌ VIN already exists for row ${index}`);
+          setError(error.response.data.message);
+          updateRow(index, { error: error.response.data.message, showRewash: true, rewash: false });
+          setSuccess("");
+          setIsButtonDisabled(true);
+      } else if (error.response?.status === 400) {
+          console.log(`❌ VIN already exists for row and re-washed ${index}`);
+          setError(error.response.data.message);
+          updateRow(index, { error: error.response.data.message, showRewash: false, rewash: false });
+          setSuccess("");
+          setIsButtonDisabled(true);
+      } else {
+          // Handle other unexpected errors
+          console.error('⚠️ Error validating VIN:', error.response?.data?.message || error.message);
+          setError(error.response?.data?.message || error.message);
+          setSuccess("");
+          setIsButtonDisabled(true);
+      }
       return false;
     }
+  };
+
+  const updateRow = (index, updatedFields) => {
+      setOrderRows((prevRows) =>
+          prevRows.map((row, i) => {
+              return i === index ? { ...row, ...updatedFields } : row;
+          })
+      );
   };
 
   const handleAddRow = () => {
@@ -120,6 +131,8 @@ const UserLandingPage = () => {
         price: 225,
         custom_price: 0,
         comment: "",
+        error: "",
+        showRewash: false,
       },
     ]);
   };
@@ -140,23 +153,14 @@ const UserLandingPage = () => {
       setError("");
       setIsButtonDisabled(false);
     }
-    if (field === "rewashChecked" && value === true) {
-      setError(""); // Remove error when rewash is checked
-      setIsButtonDisabled(false);
-    } else if (field === "rewashChecked" && value === false) {
-      handleVINValidation(orderRows[index].vin, index); // Revalidate VIN if unchecked
-    }
     if(field === "vin"){
       handleVINChange(value, index);
     }
     if(field === "truck_company") {
       setSelectedTruckCompany(value);
-      //console.log(value);
-      //console.log(truckCompanies);
       const types = truckCompanies
         .filter((truck) => truck.truck_company === value)
         .map((truck) => truck.truck_type);
-      //console.log(types);
       setAvailableTruckTypes([...new Set(types)]); // Ensure unique truck types
       setSelectedTruckType(types[0]); // Default to the first truck type
     }
@@ -185,6 +189,7 @@ const UserLandingPage = () => {
     custom_price: 0,
     picture: null,
     comment: "",
+    showRewash: false,
   });
   const [vinNumber, setVinNumber] = useState(orderDetails?.vin_no || "");
   const [error, setError] = useState("");
@@ -204,17 +209,28 @@ const UserLandingPage = () => {
   const handleVINChange = (value, index) => {
     const vinInput = value.toUpperCase();
     if (vinInput.length > 6) return;
+    updateRow(index, { vin: vinInput });
     setVinNumber(vinInput);
-    handleRowChange(index, "rewashChecked", false);
     if (vinInput.length === 6 && validateVIN(vinInput)) {
-        handleVINValidation(vinInput, index);
-        setIsButtonDisabled(false);
+      const isDuplicate = orderRows.some((row, i) => i !== index && row.vin === vinInput);
+      console.log(`🔍 isDuplicate for row ${index}:`, isDuplicate);
+      if (isDuplicate) {
+          updateRow(index, { error: "Duplicate VIN in this order!", showRewash: false });
+          setIsButtonDisabled(true);
+      } else {
+          handleVINValidation(vinInput, index);
+      }
     } else if (vinInput.length < 6) {
-        setError("VIN must be 6 alphanumeric characters.");
-        handleRowChange(index, "showRewash", true);
+        updateRow(index, { error: "VIN must be 6 alphanumeric characters.", showRewash: false });
         setIsDropdownDisabled(false); // Allow manual selection
         setIsButtonDisabled(true);
     }
+  };
+
+  const handleRewashChange = (index, checked) => {
+      updateRow(index, { rewash: checked, showRewash: true, error: "" });
+      setError("");
+      setIsButtonDisabled(!checked);
   };
 
   const handleInputChange = (e) => {
@@ -241,7 +257,6 @@ const UserLandingPage = () => {
   };
 
   const handleFileChange = (e) => {
-    console.log(vinNumber);
     setOrderDetails({ ...orderDetails, picture: e.target.files[0] });
     if(e.target.files[0] === undefined && vinNumber === ""){
       setIsButtonDisabled(true);
@@ -252,12 +267,12 @@ const UserLandingPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Check if any row has an error and "Rewash" is unchecked
-    const hasInvalidRows = orderRows.some((row) => row.error && !row.rewashChecked);
-
-    if (hasInvalidRows) {
-      alert("Please resolve VIN errors or select 'Rewash' for affected rows.");
-      return;
+    if (orderDetails.category === "New") {
+        const missingFields = orderRows.some(row => !row.truck_company || !row.truck_type);
+        if (missingFields) {
+            alert("Truck company and truck type are required for all rows.");
+            return;
+        }
     }
     try {
       const formData = new FormData();
@@ -279,12 +294,13 @@ const UserLandingPage = () => {
       // Append each row of order details
       orderRows.forEach((row, index) => {
         formData.append(`orders[${index}][vin]`, orderDetails.category === "Used" ? vinNumber : row.vin);
+        formData.append(`orders[${index}][rewash]`, orderDetails.category === "Used" ? orderDetails.rewash : row.rewash ? "true" : "false");
         formData.append(`orders[${index}][date]`, orderDetails.category === "Used" ? orderDetails.date : row.date);
         formData.append(`orders[${index}][truck_company]`, orderDetails.category === "Used" ? "Custom" : row.truck_company);
         formData.append(`orders[${index}][truck_type]`, orderDetails.category === "Used" ? orderDetails.truck_type : row.truck_type);
         formData.append(`orders[${index}][price]`, orderDetails.category === "Used" ? orderDetails.price : row.price);
         formData.append(`orders[${index}][custom_price]`, orderDetails.category === "Used" ? orderDetails.custom_price : row.custom_price);
-        formData.append(`orders[${index}][comment]`, orderDetails.category === "Used" ? orderDetails.comment : row.comment);
+        formData.append(`orders[${index}][comment]`, orderDetails.category === "Used" ? orderDetails.comment : row.comment?.trim() ? row.comment : "");
         formData.append(`orders[${index}][company]`, selectedCompany);
       });
 
@@ -303,6 +319,7 @@ const UserLandingPage = () => {
             price: 225,
             custom_price: 0,
             company: "",
+            showRewash: false,
           },
         ]);
         setOrderDetails({
@@ -318,6 +335,7 @@ const UserLandingPage = () => {
           comment: "",
           company: "",
           picture: null,
+          showRewash: false,
         });
         setVinNumber("");
         setError("");
@@ -358,96 +376,91 @@ const UserLandingPage = () => {
           {orderType === "New" && (
             <>
               {orderRows.map((row, index) => (
-                <div key={index} className="order-row">
-                  <input
-                    type="text"
-                    placeholder="VIN"
-                    value={row.vin}
-                    maxLength={6}
-                    className="input-row"
-                    onChange={(e) => handleRowChange(index, "vin", e.target.value)}
-                  />
-                  {(error && row.showRewash) && (
-                    <div className="rewash-container">
-                      <input
-                        type="checkbox"
-                        id={`rewash-${index}`}
-                        checked={row.rewashChecked}
-                        onChange={(e) => {
-                          const checked = e.target.checked;
-                          handleRowChange(index, "rewashChecked", checked);
-
-                          if (checked) {
-                            setError(""); // Remove error when rewash is checked
-                          } else {
-                            handleVINValidation(row.vin, index); // Revalidate VIN if unchecked
-                          }
-                        }}
-                      />
-                      <label htmlFor={`rewash-${index}`}>Rewash (Bypass VIN validation)</label>
-                    </div>
-                  )}
-                  <input
-                    className="input-row"
-                    type="text"
-                    placeholder="Date"
-                    value={row.date}
-                    onChange={(e) => handleRowChange(index, "date", e.target.value)}
-                    disabled
-                  />
-                  <select
-                    value={row.truck_company}
-                    onChange={(e) => handleRowChange(index, "truck_company", e.target.value)}
-                    disabled={isDropdownDisabled}
-                  >
-                    <option value="">Select Truck Company</option>
-                    {uniqueTruckCompanies.map((truckcompany) => (
-                      <option key={truckcompany} value={truckcompany}>{truckcompany}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={row.truck_type}
-                    onChange={(e) => handleRowChange(index, "truck_type", e.target.value)}
-                  >
-                    {availableTruckTypes.map((type, index) => (
-                      <option key={index} value={type}>{type}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="number"
-                    className="input-row"
-                    placeholder="Price"
-                    value={row.price}
-                    onChange={(e) => handleRowChange(index, "price", e.target.value)}
-                    disabled
-                  />
-                  <input
-                    type="number"
-                    className="input-row"
-                    placeholder="Custom Price"
-                    value={row.custom_price}
-                    onChange={(e) => handleRowChange(index, "custom_price", e.target.value)}
-                  />
-                  <textarea
-                      placeholder="Add a comment..."
-                      className="comment-row"
-                      onChange={(e) => handleRowChange(index, "comment", e.target.value)}
-                  />
-                  <select
-                    value={row.company}
-                    onChange={(e) => handleRowChange(index, "company", e.target.value)}
-                    disabled={true}
-                  >
-                    <option value={selectedCompany}>{selectedCompany}</option>
-                  </select>
-                  {orderRows.length > 1 && (
-                    <button type="button" onClick={() => handleRemoveRow(index)}>
-                      Remove
-                    </button>
-                  )}
-                </div>
+                <React.Fragment key={index}>
+                  <div className="order-row">
+                    <input
+                      type="text"
+                      placeholder="VIN"
+                      value={row.vin}
+                      maxLength={6}
+                      className="input-row"
+                      onChange={(e) => handleRowChange(index, "vin", e.target.value)}
+                    />
+                    {row.showRewash && (
+                        <div className="rewash-container">
+                            <input
+                                type="checkbox"
+                                id={`rewash-${index}`}
+                                checked={row.rewash}
+                                onChange={(e) => handleRewashChange(index, e.target.checked)}
+                            />
+                            <label htmlFor={`rewash-${index}`}>Rewash (Bypass VIN validation)</label>
+                        </div>
+                    )}
+                    <input
+                      className="input-row"
+                      type="text"
+                      placeholder="Date"
+                      value={row.date}
+                      onChange={(e) => handleRowChange(index, "date", e.target.value)}
+                      disabled
+                    />
+                    <select
+                      value={row.truck_company}
+                      onChange={(e) => handleRowChange(index, "truck_company", e.target.value)}
+                      disabled={isDropdownDisabled}
+                    >
+                      <option value="">Select Truck Company</option>
+                      {uniqueTruckCompanies.map((truckcompany) => (
+                        <option key={truckcompany} value={truckcompany}>{truckcompany}</option>
+                      ))}
+                    </select>
+                    <select
+                      value={row.truck_type}
+                      onChange={(e) => handleRowChange(index, "truck_type", e.target.value)}
+                    >
+                      {availableTruckTypes.map((type, index) => (
+                        <option key={index} value={type}>{type}</option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      className="input-row"
+                      placeholder="Price"
+                      value={row.price}
+                      onChange={(e) => handleRowChange(index, "price", e.target.value)}
+                      disabled
+                    />
+                    <input
+                      type="number"
+                      className="input-row"
+                      placeholder="Custom Price"
+                      value={row.custom_price}
+                      onChange={(e) => handleRowChange(index, "custom_price", e.target.value)}
+                    />
+                    <textarea
+                        placeholder="Add a comment..."
+                        className="comment-row"
+                        onChange={(e) => handleRowChange(index, "comment", e.target.value)}
+                    />
+                    <select
+                      value={row.company}
+                      onChange={(e) => handleRowChange(index, "company", e.target.value)}
+                      disabled={true}
+                    >
+                      <option value={selectedCompany}>{selectedCompany}</option>
+                    </select>
+                    {orderRows.length > 1 && (
+                      <button type="button" onClick={() => handleRemoveRow(index)}>
+                        Remove
+                      </button>
+                    )}
+                  </div>
+                  <div>
+                    {row.error && <p className="error-message">{row.error}</p>}
+                  </div>
+                </React.Fragment>
               ))}
-              {error && <p className="error-message">{error}</p>}
               {success && <p className="success-message">{success}</p>}
               <button type="button" onClick={handleAddRow}>
                 Add Row
@@ -475,6 +488,17 @@ const UserLandingPage = () => {
                   />
                   {error && <p className="error-message">{error}</p>}
                   {success && <p className="success-message">{success}</p>}
+                  {orderDetails.showRewash && (
+                      <div className="rewash-container">
+                          <input
+                              type="checkbox"
+                              id="used-rewash"
+                              checked={orderDetails.rewash}
+                              onChange={(e) => setOrderDetails({ ...orderDetails, rewash: e.target.checked })}
+                          />
+                          <label htmlFor="used-rewash">Rewash (Bypass VIN validation)</label>
+                      </div>
+                  )}
                 </div>
                 <div>
                   <label>Color:</label>
