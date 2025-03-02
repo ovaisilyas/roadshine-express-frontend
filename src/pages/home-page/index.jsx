@@ -12,7 +12,7 @@ const LandingPage = ({ user, setUser }) => {
     <div>
       <Header user={user} setUser={setUser}/>
       <HeroBanner />
-      <div id="services" class="section">
+      <div id="services" class="section" style={{ backgroundImage: `url('/images/services-bg.jpg') no-repeat center center/cover` }}>
           <h2>Our Services</h2>
           <ul>
               <li>✔ Full Exterior Truck Washing</li>
@@ -20,13 +20,13 @@ const LandingPage = ({ user, setUser }) => {
               <li>✔ Frame and Underbody Cleaning</li>
               <li>✔ Custom Detailing Packages</li>
           </ul>
-      </div><div id="contact" class="section">
+      </div><div id="contact" class="section" style={{ backgroundImage: `url('/images/contact-bg.jpg') no-repeat center center/cover` }}>
           <h2>Contact Us</h2>
           <p>Reach out to us for bookings and inquiries:</p>
           <p>Email: roadshineexpress@gmail.com</p>
           <p>Phone: (615) 397-7418</p>
       </div>
-      <div className="section">
+      <div id="what-we-do" className="section" style={{ backgroundImage: `url('/images/whatwedo-bg.jpg') no-repeat center center/cover` }}>
         <h2>What We Do:</h2>
         <p>- Professional Truck Washing Services: From individual trucks to fleets, we ensure your vehicles are spotless and road-ready.</p>
         <p>- Innovative Web-Based Database: The only platform exclusively built for truck washing businesses, offering invoicing, payment processing, reports, truck profiles, and unlimited storage. </p>
@@ -34,7 +34,7 @@ const LandingPage = ({ user, setUser }) => {
         <p>- Keep Your Trucks Clean: Schedule a Wash Today!</p>
         <p>- Revolutionize Your Truck Wash Business: Subscribe to Our Platform Now!</p>
       </div>
-      <div className="section">
+      <div id="about" className="section" style={{ backgroundImage: `url('/images/about-bg.jpg') no-repeat center center/cover` }}>
         <h2>About Us</h2>
         <p>We wash, clean inside and outside of the truck, paint the frame, and shine the rims</p>
         <p>We are located in Nashville, TN. We contract major truck dealerships and shine their trucks and make their custmers happy. Wether its a New Truck that needs freshing up or a used truck that needs a complete flip.
