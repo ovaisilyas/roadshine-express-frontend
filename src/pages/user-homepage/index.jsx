@@ -237,6 +237,13 @@ const UserLandingPage = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let updatedPrice = orderDetails.price;
+    if(name === "userId"){
+      const selectedUser = activeUsers.find(user => user.users_id === Number(value));
+      const selCompany = selectedUser ? selectedUser.company : "";
+
+      setSelectedCompany(selCompany);
+      fetchTruckCompanies(selCompany);
+    }
     if(name === "truck_type"){
       setSelectedTruckType(value);
     }
