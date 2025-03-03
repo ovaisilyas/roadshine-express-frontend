@@ -193,7 +193,7 @@ const OrderHistoryPage = ({ user, setUser }) => {
         </div>
 
         {groupedOrders.length === 0 ? (
-          <p className="error-message">No orders found.</p>
+          <p className="error-message">{error}</p>
         ) : (
           <table className="order-table">
             <thead>
