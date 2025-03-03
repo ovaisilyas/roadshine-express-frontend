@@ -1,59 +1,95 @@
 .about {
-    padding: 20px;
-    text-align: center;
-  }
-
-  .about h2 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-  }
-
-  .about p {
-    font-size: 1.2rem;
-    color: #555;
-    max-width: 800px;
-    margin: 0 auto;
-    line-height: 1.6;
-  }
-
-  main {
-    padding: 20px;
-  }
-
-  .section {
-    padding: 40px 20px;
-    text-align: center;
-    background-color: white;
-    margin: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  text-align: center;
 }
 
-.section ul {
-  list-style: none;
-  padding: 0;
+.about h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
 }
 
-img.section-image {
-  width: 100%;
+.about p {
+  font-size: 1.2rem;
+  color: #555;
   max-width: 800px;
-  height: auto;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+main {
+  padding: 20px;
+}
+
+/* Sections */
+.section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 60px 10%;
+  gap: 40px;
+}
+
+/* Content */
+.content {
+  flex: 1;
+  text-align: left;
+  max-width: 500px;
+}
+
+.content h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+
+.content p,
+ul {
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+
+.image-container img {
+  width: 100%;
+  max-width: 500px;
   border-radius: 10px;
-  margin-top: 20px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 }
 
-#services {
+/* CTA Button */
+.cta-btn {
+  display: inline-block;
+  background-color: #003366;
   color: white;
+  font-size: 1.2rem;
+  padding: 12px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background 0.3s;
+  margin-top: 15px;
+  border: none;
+  cursor: pointer;
 }
 
-#contact {
-  color: white;
+.cta-btn:hover {
+  background-color: #e68900;
 }
 
-#what-we-do {
-  color: white;
-}
+/* Responsive Design */
+@media (max-width: 768px) {
+  .section {
+    flex-direction: column;
+    text-align: center;
+    padding: 40px;
+  }
 
-#about {
-  color: white;
+  .reverse {
+    flex-direction: column;
+  }
+
+  .image-container img {
+    max-width: 100%;
+  }
+
+  .content {
+    text-align: center;
+  }
 }

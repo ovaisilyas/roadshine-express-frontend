@@ -1,5 +1,4 @@
 .manage-orders {
-    padding: 20px;
     min-height: 100vh;
     background-color: #f9f9f9;
   }
@@ -30,6 +29,7 @@
 }
 
 .orders-header {
+    padding: 20px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -41,7 +41,6 @@
 }
 
   .manage-orders h2 {
-    margin-bottom: 20px;
     font-size: 24px;
     color: #333;
   }
@@ -90,19 +89,19 @@
 }
 
 .update-btn {
-    background-color: green;
+    background-color: #003366;
     color: white;
 }
 
 .close-btn {
-    background-color: red;
+    background-color: #003366;
     color: white;
 }
 
 .place-order-btn {
   margin-top: 20px;
   padding: 10px 20px;
-  background-color: #007BFF;
+  background-color: #003366;
   color: white;
   border: none;
   border-radius: 5px;
@@ -111,7 +110,7 @@
 }
 
 .place-order-btn:hover {
-  background-color: #0056b3;
+  background-color: #003366;
 }
 
 .order-popup .order-image {
@@ -134,12 +133,12 @@
 }
 
 .tabs button.active {
-  background-color: #007bff;
+  background-color: #003366;
   color: white;
 }
 
 .print-btn {
-  background-color: #007bff;
+  background-color: #003366;
   color: white;
   padding: 8px 16px;
   border: none;
@@ -152,3 +151,18 @@
   background-color: #ccc;
   cursor: not-allowed;
 }
+
+.search-bar {
+  margin-top: 20px;
+}
+
+.print-btn {
+  margin: 0;
+}
+
+.row-pending {
+  background-color: lightblue;
+  border: 2px solid;
+  border-color: #003366;
+}
+

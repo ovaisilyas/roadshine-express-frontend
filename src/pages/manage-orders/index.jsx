@@ -111,7 +111,7 @@ const ManageOrders = ({ user, setUser }) => {
   };
 
   const filteredOrders = orders.filter((order) =>
-    order.items.some((item) => item.vin_no.toLowerCase().includes(searchTerm.toLowerCase()))
+    order.items.some((item) => item.vin_no !== null ? item.vin_no.toLowerCase().includes(searchTerm.toLowerCase()) : item.vin_no)
   );
 
   const groupedOrders = filteredOrders
@@ -236,6 +236,7 @@ const ManageOrders = ({ user, setUser }) => {
                     <th>Truck Type</th>
                     <th>Price</th>
                     <th>Picture</th>
+                    <th>Company</th>
                     <th>Status</th>
                     <th>Comment</th>
                     <th>Admin Comment</th>
@@ -246,7 +247,7 @@ const ManageOrders = ({ user, setUser }) => {
                 <tbody>
                   {groupedOrders.map((order) =>
                     order.items.map((item) => (
-                      <tr key={item.orderitem_id}>
+                      <tr key={item.orderitem_id} className={`row-${item.item_status.toLowerCase().replace(/\s+/g, '-')}`}>
                         <td>
                           <input
                             type="checkbox"
@@ -254,7 +255,7 @@ const ManageOrders = ({ user, setUser }) => {
                             onChange={() => toggleItemSelection(item.orderitem_id)}
                           />
                         </td>
-                        <td>{order.useremail}</td>
+                        <td>{order.full_name}</td>
                         <td>{order.category}</td>
                         <td>{order.order_id}</td>
                         <td>{new Date(order.order_date).toLocaleDateString()}</td>
@@ -265,6 +266,7 @@ const ManageOrders = ({ user, setUser }) => {
                         <td>{item.truck_type}</td>
                         <td>${item.price}</td>
                         <td>{order.picture_url && <img src={order.picture_url} alt="Order" className="order-image" />}</td>
+                        <td>{item.company}</td>
                         <td><OrderStatus status={item.item_status} /></td>
                         <td>{item.comment || "N/A"}</td>
                         <td>{order.admin_comment || "N/A"}<textarea
