@@ -27,7 +27,7 @@ const OrderHistoryPage = ({ user, setUser }) => {
       const response = await apiClient.get("/orders/user");
       setOrders(response.data.orders);
     } catch (err) {
-      setError("Failed to fetch order history.");
+      setError(err.response.data.message);
       console.error(err);
     } finally {
       setLoading(false);
@@ -160,7 +160,6 @@ const OrderHistoryPage = ({ user, setUser }) => {
   .filter((order) => order.items.length > 0); // Only include orders that still have items after filtering
 
   if (loading) return <p>Loading order history...</p>;
-  if (error) return <p>{error}</p>;
 
   return (
     <div className="order-history-page">
@@ -194,7 +193,7 @@ const OrderHistoryPage = ({ user, setUser }) => {
         </div>
 
         {groupedOrders.length === 0 ? (
-          <p>No orders found.</p>
+          <p className="error-message">No orders found.</p>
         ) : (
           <table className="order-table">
             <thead>
