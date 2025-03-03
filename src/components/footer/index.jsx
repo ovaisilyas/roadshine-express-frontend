@@ -24,10 +24,10 @@ const Footer = () => {
       </p>
 
       <div className="footer-social">
-        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">
+        <a href="https://www.facebook.com/share/1HFJLDnHm1/" target="_blank" rel="noopener noreferrer">
           <FontAwesomeIcon icon={faFacebookF} />
         </a>
-        <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">
+        <a href="https://www.instagram.com/roadshineexpress?igsh=MW1ib3dhbGRndXR0YQ==" target="_blank" rel="noopener noreferrer">
           <FontAwesomeIcon icon={faInstagram} />
         </a>
         <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer">
