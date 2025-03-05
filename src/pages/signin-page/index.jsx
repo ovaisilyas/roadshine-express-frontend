@@ -24,7 +24,7 @@ const SignInPage = () => {
           setUser(user);
           localStorage.setItem("user", JSON.stringify(user));
           localStorage.setItem("authToken", token);
-          if(user.role === 'User'){
+          if(user.role === 'User' || user.role === 'Accountant'){
             navigate("/user");
           } else if(user.role === 'Administrator' || user.role === 'Employee'){
             navigate("/admin");

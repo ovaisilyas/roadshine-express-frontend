@@ -12,6 +12,7 @@ const Header = () => {
   const isAdmin = user?.role === "Administrator";
   const isEmployee = user?.role === "Employee";
   const isUser = user?.role === "User";
+  const isAccountant = user?.role === "Accountant";
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
 
@@ -48,7 +49,7 @@ const Header = () => {
       <nav>
         <ul className={`nav-links ${menuOpen ? "active" : ""}`}>
           <li onClick={() => navigate("/")}>Home</li>
-          {isUser && (
+          {isUser || isAccountant && (
             <>
               <li onClick={() => navigate("/user")}>Place Order</li>
               <li onClick={() => navigate("/user/orders")}>Orders</li>
