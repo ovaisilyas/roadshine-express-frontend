@@ -49,7 +49,7 @@ const Header = () => {
       <nav>
         <ul className={`nav-links ${menuOpen ? "active" : ""}`}>
           <li onClick={() => navigate("/")}>Home</li>
-          {isUser || isAccountant && (
+          {(isUser || isAccountant) && (
             <>
               <li onClick={() => navigate("/user")}>Place Order</li>
               <li onClick={() => navigate("/user/orders")}>Orders</li>
