@@ -232,11 +232,9 @@ const ManageOrders = ({ user, setUser }) => {
                     <th>Color</th>
                     <th>Services</th>
                     <th>VIN</th>
-                    <th>Truck Company</th>
-                    <th>Truck Type</th>
+                    <th>Truck Company/Type</th>
                     <th>Price</th>
                     <th>Picture</th>
-                    <th>Company</th>
                     <th>Status</th>
                     <th>Comment</th>
                     <th>Admin Comment</th>
@@ -255,18 +253,16 @@ const ManageOrders = ({ user, setUser }) => {
                             onChange={() => toggleItemSelection(item.orderitem_id)}
                           />
                         </td>
-                        <td>{order.full_name}</td>
+                        <td><strong>{item.company}</strong><br/><br/>{order.full_name}</td>
                         <td>{order.category}</td>
                         <td>{order.order_id}</td>
                         <td>{new Date(order.order_date).toLocaleDateString()}</td>
                         <td>{order.category === "Used" ? order.color : "N/A"}</td>
                         <td>{order.category === "Used" ? order.services : "N/A"}</td>
                         <td><b>{item.vin_no}</b></td>
-                        <td>{item.truck_company}</td>
-                        <td>{item.truck_type}</td>
+                        <td>{item.truck_company}<br/><br/>{item.truck_type}</td>
                         <td>${item.price}</td>
                         <td>{order.picture_url && <img src={order.picture_url} alt="Order" className="order-image" />}</td>
-                        <td>{item.company}</td>
                         <td><OrderStatus status={item.item_status} /></td>
                         <td>{item.comment || "N/A"}</td>
                         <td>{order.admin_comment || "N/A"}<textarea

@@ -23,10 +23,6 @@
     color: black;
 }
 
-.order-table tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
 .order-table tr:hover {
     background-color: #ddd;
 }
