@@ -13,6 +13,7 @@ const EditOrderItemModal = ({ isOpen, onClose, orderItem, order, refreshOrders }
         custom_price: "",
         comment: "",
         color: "",
+        poNumber: "",
         services: "",
         price: "0",
     });
@@ -91,6 +92,7 @@ const EditOrderItemModal = ({ isOpen, onClose, orderItem, order, refreshOrders }
             custom_price: orderItem.custom_price,
             comment: orderItem.comment,
             color: order?.category === "Used" ? order.color : "", // Only for "Used" category
+            poNumber: order?.category === "Used" ? order.po_number : "",
             services: order?.category === "Used" ? order.services : "", // Only for "Used" category
             price: order?.category === "Used" ? order.price : "0",
         });
@@ -175,6 +177,14 @@ const EditOrderItemModal = ({ isOpen, onClose, orderItem, order, refreshOrders }
 
                     {order?.category === "Used" && (
                         <>
+                        <label>PO Number:</label>
+                        <input
+                            type="text"
+                            name="poNumber"
+                            value={formData.poNumber}
+                            onChange={handleInputChange}
+                        />
+
                         <label>Color:</label>
                         <input
                             type="text"

@@ -11,7 +11,6 @@ const InvoicePage = ({ user }) => {
   const [selectedTruckCompanies, setSelectedTruckCompanies] = useState([]);
   const [uniqueTruckCompanies, setUniqueTruckCompanies] = useState([]);
   const [truckCategory, setTruckCategory] = useState("New");
-  const [poNumber, setPoNumber] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
 
@@ -53,7 +52,6 @@ const InvoicePage = ({ user }) => {
   const handleGenerateInvoice = async () => {
     try {
       const payload = {
-        po_number: poNumber,
         category: truckCategory,
         company: company,
         truck_companies: selectedTruckCompanies,
@@ -78,15 +76,6 @@ const InvoicePage = ({ user }) => {
         </div>
       )}
       <div className="invoice-body">
-        {/* PO Number Input */}
-        <label>PO Number:</label>
-        <input
-          type="text"
-          value={poNumber}
-          onChange={(e) => setPoNumber(e.target.value)}
-          placeholder="Enter PO Number (Optional)"
-        />
-
         <label>Select Truck Category:</label>
         <select onChange={(e) => setTruckCategory(e.target.value)}>
             <option value="New">New</option>

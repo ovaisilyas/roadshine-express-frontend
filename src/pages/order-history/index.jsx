@@ -207,6 +207,7 @@ const OrderHistoryPage = ({ user, setUser }) => {
                 </th>
                 <th>Category</th>
                 <th>Order ID</th>
+                <th>PO Number</th>
                 <th>Order Date</th>
                 <th>VIN</th>
                 <th>Truck Company</th>
@@ -232,6 +233,7 @@ const OrderHistoryPage = ({ user, setUser }) => {
                     </td>
                     <td>{order.category}</td>
                     <td>{order.order_id}</td>
+                    <td>{order.po_number}</td>
                     <td>{new Date(order.order_date).toLocaleDateString()}</td>
                     <td>{item.vin_no}</td>
                     <td>{item.truck_company}</td>

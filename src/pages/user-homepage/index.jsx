@@ -88,20 +88,20 @@ const UserLandingPage = () => {
       }
     } catch (error) {
       if (error.response?.status === 404) {
-          console.log(`❌ VIN already exists for row ${index}`);
+          console.log(`VIN already exists for row ${index}`);
           setError(error.response.data.message);
           updateRow(index, { error: error.response.data.message, showRewash: true, rewash: false });
           setSuccess("");
           setIsButtonDisabled(true);
       } else if (error.response?.status === 400) {
-          console.log(`❌ VIN already exists for row and re-washed ${index}`);
+          console.log(`VIN already exists for row and re-washed ${index}`);
           setError(error.response.data.message);
           updateRow(index, { error: error.response.data.message, showRewash: false, rewash: false });
           setSuccess("");
           setIsButtonDisabled(true);
       } else {
           // Handle other unexpected errors
-          console.error('⚠️ Error validating VIN:', error.response?.data?.message || error.message);
+          console.error('Error validating VIN:', error.response?.data?.message || error.message);
           setError(error.response?.data?.message || error.message);
           setSuccess("");
           setIsButtonDisabled(true);
@@ -191,6 +191,7 @@ const UserLandingPage = () => {
     picture: null,
     comment: "",
     showRewash: false,
+    poNumber: "",
   });
   const [vinNumber, setVinNumber] = useState(orderDetails?.vin_no || "");
   const [error, setError] = useState("");
@@ -214,7 +215,7 @@ const UserLandingPage = () => {
     setVinNumber(vinInput);
     if (vinInput.length === 6 && validateVIN(vinInput)) {
       const isDuplicate = orderRows.some((row, i) => i !== index && row.vin === vinInput);
-      console.log(`🔍 isDuplicate for row ${index}:`, isDuplicate);
+      console.log(`isDuplicate for row ${index}:`, isDuplicate);
       if (isDuplicate) {
           updateRow(index, { error: "Duplicate VIN in this order!", showRewash: false });
           setIsButtonDisabled(true);
@@ -289,8 +290,10 @@ const UserLandingPage = () => {
       formData.append("color", orderDetails.color);
       if(orderDetails.category === "Used") {
         formData.append("services", orderDetails.services);
+        formData.append("po_number", orderDetails.poNumber);
       } else {
         formData.append("services", "");
+        formData.append("po_number", "");
       }
       if (orderDetails.customOrder) {
         formData.append("custom_order", orderDetails.customOrder);
@@ -344,6 +347,7 @@ const UserLandingPage = () => {
           company: "",
           picture: null,
           showRewash: false,
+          poNumber: "",
         });
         setVinNumber("");
         setError("");
@@ -514,6 +518,16 @@ const UserLandingPage = () => {
                     type="text"
                     name="color"
                     value={orderDetails.color}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div>
+                  <label>PO Number:</label>
+                  <input
+                    type="text"
+                    name="poNumber"
+                    value={orderDetails.poNumber}
                     onChange={handleInputChange}
                   />
                 </div>

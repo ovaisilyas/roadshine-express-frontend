@@ -108,6 +108,7 @@ const InvoiceList = ({ user }) => {
         <thead>
           <tr>
             <th>Invoice Number</th>
+            <th>PO Number</th>
             <th>Company</th>
             <th>Truck Category</th>
             <th>Total Amount</th>
@@ -125,6 +126,7 @@ const InvoiceList = ({ user }) => {
             filteredInvoices.map((invoice) => (
               <tr key={invoice.invoice_id}>
                 <td>{invoice.invoice_number}</td>
+                <td>{invoice.po_number}</td>
                 <td>{invoice.company}</td>
                 <td>{invoice.truck_category}</td>
                 <td>${parseFloat(invoice.total_amount).toFixed(2)}</td>

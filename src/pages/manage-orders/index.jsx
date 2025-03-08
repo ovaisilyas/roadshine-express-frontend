@@ -226,6 +226,7 @@ const ManageOrders = ({ user, setUser }) => {
                     <th>User</th>
                     <th>Category</th>
                     <th>Order ID</th>
+                    <th>PO Number</th>
                     <th>Order Date</th>
                     <th>Color</th>
                     <th>Services</th>
@@ -254,6 +255,7 @@ const ManageOrders = ({ user, setUser }) => {
                         <td><strong>{item.company}</strong><br/><br/>{order.full_name}</td>
                         <td>{order.category}</td>
                         <td>{order.order_id}</td>
+                        <td>{order.category === "Used" ? order.po_number : "N/A"}</td>
                         <td>{new Date(order.order_date).toLocaleDateString()}</td>
                         <td>{order.category === "Used" ? order.color : "N/A"}</td>
                         <td>{order.category === "Used" ? order.services : "N/A"}</td>
@@ -282,7 +284,6 @@ const ManageOrders = ({ user, setUser }) => {
                             <option value="Hold">Hold</option>
                             <option value="Truck Not Found">Truck Not Found</option>
                             <option value="Truck Not Ready">Truck Not Ready</option>
-                            <option value="Invoiced">Invoiced</option>
                           </select>
                         </td>
                         <td>
