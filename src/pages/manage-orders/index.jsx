@@ -20,8 +20,6 @@ const ManageOrders = ({ user, setUser }) => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedOrderItem, setSelectedOrderItem] = useState(null);
 
-  console.log(user?.company);
-
   const openModal = (order, orderItem) => {
     setSelectedOrder(order);
     setSelectedOrderItem(orderItem);
@@ -304,7 +302,6 @@ const ManageOrders = ({ user, setUser }) => {
           onClose={closeModal}
           orderItem={selectedOrderItem}
           order={selectedOrder}
-          company={user?.company}
           refreshOrders={fetchOrders}
         />
       <Footer />

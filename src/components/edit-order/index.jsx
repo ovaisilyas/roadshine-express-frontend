@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import apiClient from "../../utils/ApiClient";
 import "../../static/css/Modal.css"; // Ensure styles are properly applied
 
-const EditOrderItemModal = ({ isOpen, onClose, orderItem, order, company, refreshOrders }) => {
+const EditOrderItemModal = ({ isOpen, onClose, orderItem, order, refreshOrders }) => {
     const [uniqueTruckCompanies, setUniqueTruckCompanies] = useState([]);
     const [truckCompanies, setTruckCompanies] = useState([]);
     const [availableTruckTypes, setAvailableTruckTypes] = useState([]);
@@ -31,9 +31,9 @@ const EditOrderItemModal = ({ isOpen, onClose, orderItem, order, company, refres
 
     useEffect(() => {
         const handleOutsideClick = (event) => {
-          if (event.target.classList.contains("modal-overlay")) {
+            if (event.target.classList.contains("modal-overlay")) {
             onClose();
-          }
+            }
         };
 
         if (isOpen) {
@@ -41,12 +41,14 @@ const EditOrderItemModal = ({ isOpen, onClose, orderItem, order, company, refres
             setIsButtonDisabled(false);
             document.addEventListener("click", handleOutsideClick);
         } else {
-          document.removeEventListener("click", handleOutsideClick);
+            document.removeEventListener("click", handleOutsideClick);
         }
 
         return () => document.removeEventListener("click", handleOutsideClick);
-      }, [isOpen, onClose]);
+    }, [isOpen, onClose]);
 
+    const company = orderItem?.company;
+    const truckCompany = orderItem?.truck_company;
     useEffect(() => {
         const fetchTruckCompanies = async () => {
             if(company === "") {
@@ -56,6 +58,10 @@ const EditOrderItemModal = ({ isOpen, onClose, orderItem, order, company, refres
                 const response = await apiClient.get(`/trucks/truckcompanies?company=${company}`);
                 const companies = response.data;
                 setTruckCompanies(companies);
+                const types = companies
+                    .filter((truck) => truck.truck_company === truckCompany)
+                    .map((truck) => truck.truck_type);
+                setAvailableTruckTypes([...new Set(types)]);
                 const distinctCompanies = [...new Set(companies.map((c) => c.truck_company))];
                 setUniqueTruckCompanies(distinctCompanies);
             } catch (error) {
@@ -66,7 +72,7 @@ const EditOrderItemModal = ({ isOpen, onClose, orderItem, order, company, refres
         if(company){
             fetchTruckCompanies();
         }
-      }, [company]);
+    }, [company, truckCompany]);
 
     const handleTruckCompanyChange = (value) => {
         const types = truckCompanies
