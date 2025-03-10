@@ -15,6 +15,7 @@ const UserForm = ({ user = {}, onSubmit, onCancel }) => {
     organization: user?.organization || "",
     status: user?.status || "active",
     role: user?.role || "User",
+    category: user?.category || "New",
   });
 
   useEffect(() => {
@@ -107,6 +108,18 @@ const UserForm = ({ user = {}, onSubmit, onCancel }) => {
         <option value="active">Active</option>
         <option value="inactive">Inactive</option>
       </select>
+
+      <label>Category</label>
+      <select
+        name="category"
+        value={formData.category}
+        onChange={handleChange}
+        required
+      >
+        <option value="New">New</option>
+        <option value="Used">Used</option>
+      </select>
+
       <label>Role</label>
       <select
         name="role"

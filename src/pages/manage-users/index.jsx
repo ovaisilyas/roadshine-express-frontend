@@ -111,6 +111,7 @@ const ManageUsers = ({ user, setUser }) => {
               <th>Phone</th>
               <th>Company</th>
               <th>Role</th>
+              <th>Category</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -122,6 +123,7 @@ const ManageUsers = ({ user, setUser }) => {
                 <td>{user.phone}</td>
                 <td>{user.company}</td>
                 <td>{user.role}</td>
+                <td>{user.category}</td>
                 <td>
                   <button onClick={() => handleEditUser(user)}>Edit</button>
                   <button onClick={() => handleDeleteUser(user.users_id)}>

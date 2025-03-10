@@ -15,6 +15,7 @@ const UserLandingPage = () => {
   const [isDropdownDisabled, setIsDropdownDisabled] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState(user?.company);
+  const [selectedCategory, setSelectedCategory] = useState(user?.category);
   const [truckCompanies, setTruckCompanies] = useState([]);
   const [selectedTruckCompany, setSelectedTruckCompany] = useState("");
   const [uniqueTruckCompanies, setUniqueTruckCompanies] = useState([]);
@@ -40,6 +41,12 @@ const UserLandingPage = () => {
     fetchTruckCompanies(selCompany);
     setIsButtonDisabled(true);
   }, [user?.company]);
+
+  useEffect(() => {
+    const selCategory = user?.category;
+    setOrderType(selCategory);
+    setSelectedCategory(selCategory);
+  }, [user?.category]);
 
   useEffect(() => {
     if(isAdmin || isEmployee){
@@ -241,7 +248,9 @@ const UserLandingPage = () => {
     if(name === "userId"){
       const selectedUser = activeUsers.find(user => user.users_id === Number(value));
       const selCompany = selectedUser ? selectedUser.company : "";
-
+      const selCategory = selectedUser ? selectedUser.category : "";
+      setOrderType(selCategory);
+      setSelectedCategory(selCategory);
       setSelectedCompany(selCompany);
       fetchTruckCompanies(selCompany);
     }
@@ -259,7 +268,7 @@ const UserLandingPage = () => {
         setSuccess("")
       }
       updatedPrice = value === "New" ? 225 : 0; // Default price for "New" is 225, for "Used" it's dynamic
-    } else if (name === "services" && orderDetails.category === "Used") {
+    } else if (name === "services" && selectedCategory === "Used") {
       updatedPrice = servicePrices[value] || 0;
     }
     setOrderDetails({ ...orderDetails, [name]: value, price: updatedPrice, });
@@ -276,7 +285,7 @@ const UserLandingPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (orderDetails.category === "New") {
+    if (selectedCategory === "New") {
         const missingFields = orderRows.some(row => !row.truck_company || !row.truck_type);
         if (missingFields) {
             alert("Truck company and truck type are required for all rows.");
@@ -286,9 +295,9 @@ const UserLandingPage = () => {
     try {
       const formData = new FormData();
       formData.append("user_id", isAdmin ? orderDetails.userId : user?.users_id);
-      formData.append("category", orderDetails.category);
+      formData.append("category", selectedCategory);
       formData.append("color", orderDetails.color);
-      if(orderDetails.category === "Used") {
+      if(selectedCategory === "Used") {
         formData.append("services", orderDetails.services);
         formData.append("po_number", orderDetails.poNumber);
       } else {
@@ -304,14 +313,14 @@ const UserLandingPage = () => {
 
       // Append each row of order details
       orderRows.forEach((row, index) => {
-        formData.append(`orders[${index}][vin]`, orderDetails.category === "Used" ? vinNumber : row.vin);
-        formData.append(`orders[${index}][rewash]`, orderDetails.category === "Used" ? orderDetails.rewash : row.rewash ? "true" : "false");
-        formData.append(`orders[${index}][date]`, orderDetails.category === "Used" ? orderDetails.date : row.date);
-        formData.append(`orders[${index}][truck_company]`, orderDetails.category === "Used" ? "Custom" : row.truck_company);
-        formData.append(`orders[${index}][truck_type]`, orderDetails.category === "Used" ? orderDetails.truck_type : row.truck_type);
-        formData.append(`orders[${index}][price]`, orderDetails.category === "Used" ? orderDetails.price : row.price);
-        formData.append(`orders[${index}][custom_price]`, orderDetails.category === "Used" ? orderDetails.custom_price : row.custom_price);
-        formData.append(`orders[${index}][comment]`, orderDetails.category === "Used" ? orderDetails.comment : row.comment?.trim() ? row.comment : "");
+        formData.append(`orders[${index}][vin]`, selectedCategory === "Used" ? vinNumber : row.vin);
+        formData.append(`orders[${index}][rewash]`, selectedCategory === "Used" ? orderDetails.rewash : row.rewash ? "true" : "false");
+        formData.append(`orders[${index}][date]`, selectedCategory === "Used" ? orderDetails.date : row.date);
+        formData.append(`orders[${index}][truck_company]`, selectedCategory === "Used" ? "Custom" : row.truck_company);
+        formData.append(`orders[${index}][truck_type]`, selectedCategory === "Used" ? orderDetails.truck_type : row.truck_type);
+        formData.append(`orders[${index}][price]`, selectedCategory === "Used" ? orderDetails.price : row.price);
+        formData.append(`orders[${index}][custom_price]`, selectedCategory === "Used" ? orderDetails.custom_price : row.custom_price);
+        formData.append(`orders[${index}][comment]`, selectedCategory === "Used" ? orderDetails.comment : row.comment?.trim() ? row.comment : "");
         formData.append(`orders[${index}][company]`, selectedCompany);
       });
 
@@ -377,12 +386,11 @@ const UserLandingPage = () => {
           }
           <label>Category:</label>
           <select
-            name="category"
-            value={orderDetails.category}
-            onChange={handleInputChange}
-          >
-            <option value="New">New</option>
-            <option value="Used">Used</option>
+            name="category" onChange={(e) => {
+              const newValue = e.target.value;
+              setSelectedCategory(newValue);
+            }} disabled>
+              <option value={selectedCategory}>{selectedCategory}</option>
           </select>
 
           {orderType === "New" && (
