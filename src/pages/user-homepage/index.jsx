@@ -193,7 +193,7 @@ const UserLandingPage = () => {
     truck_type: "Day Cab",
     services: "",
     customOrder: "",
-    price: 225,
+    price: 0,
     custom_price: 0,
     picture: null,
     comment: "",
