@@ -136,6 +136,7 @@ const InvoiceList = ({ user }) => {
                     <option value="Pending">Pending</option>
                     <option value="Sent">Sent</option>
                     <option value="Completed">Completed</option>
+                    <option value="Paid">Paid</option>
                   </select>
                 </td>
                 <td>

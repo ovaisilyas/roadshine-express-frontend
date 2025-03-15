@@ -54,6 +54,7 @@ const ManageOrders = ({ user, setUser }) => {
         .filter((item) => selectedItems.includes(item.orderitem_id))
         .map((item) => ({
           category: order.category, // Get category from parent order
+          color: order.color,
           vin_no: item.vin_no,
           truck_company: item.truck_company || 'N/A',
           truck_type: item.truck_type,
@@ -77,6 +78,7 @@ const ManageOrders = ({ user, setUser }) => {
             <thead>
               <tr>
                 <th>Category</th>
+                <th>Color</th>
                 <th>VIN</th>
                 <th>Truck Company</th>
                 <th>Truck Type</th>
@@ -88,6 +90,7 @@ const ManageOrders = ({ user, setUser }) => {
                   (item) => `
                   <tr>
                     <td>${item.category}</td>
+                    <td>${item.color}</td>
                     <td>${item.vin_no}</td>
                     <td>${item.truck_company}</td>
                     <td>${item.truck_type}</td>
@@ -261,7 +264,7 @@ const ManageOrders = ({ user, setUser }) => {
                         <td>{order.category === "Used" ? order.services : "N/A"}</td>
                         <td><b>{item.vin_no}</b></td>
                         <td>{item.truck_company}<br/><br/>{item.truck_type}</td>
-                        <td>${item.price}</td>
+                        <td>${item.custom_price > 0 ? item.custom_price : item.price}</td>
                         <td>{order.picture_url && <img src={order.picture_url} alt="Order" className="order-image" />}</td>
                         <td><OrderStatus status={item.item_status} /></td>
                         <td>{item.comment || "N/A"}</td>

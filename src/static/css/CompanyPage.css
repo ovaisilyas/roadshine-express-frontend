@@ -1,0 +1,52 @@
+.company-form-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.company-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 400px;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.company-form input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.company-form button {
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.company-form button:hover {
+    background-color: #0056b3;
+}
+
+.company-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.company-table th, .company-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.company-table th {
+    background-color: #f4f4f4;
+}

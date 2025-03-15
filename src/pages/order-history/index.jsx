@@ -84,6 +84,7 @@ const OrderHistoryPage = ({ user, setUser }) => {
         .filter((item) => selectedItems.includes(item.orderitem_id))
         .map((item) => ({
           category: order.category, // Get category from parent order
+          color: order.color,
           vin_no: item.vin_no,
           truck_company: item.truck_company || 'N/A',
           truck_type: item.truck_type,
@@ -107,6 +108,7 @@ const OrderHistoryPage = ({ user, setUser }) => {
             <thead>
               <tr>
                 <th>Category</th>
+                <th>Color</th>
                 <th>VIN</th>
                 <th>Truck Company</th>
                 <th>Truck Type</th>
@@ -118,6 +120,7 @@ const OrderHistoryPage = ({ user, setUser }) => {
                   (item) => `
                   <tr>
                     <td>${item.category}</td>
+                    <td>${item.color}</td>
                     <td>${item.vin_no}</td>
                     <td>${item.truck_company}</td>
                     <td>${item.truck_type}</td>
@@ -238,7 +241,7 @@ const OrderHistoryPage = ({ user, setUser }) => {
                     <td>{item.vin_no}</td>
                     <td>{item.truck_company}</td>
                     <td>{item.truck_type}</td>
-                    <td>${item.price}</td>
+                    <td>${item.custom_price > 0 ? item.custom_price : item.price}</td>
                     <td><OrderStatus status={item.item_status} /></td>
                     <td>{item.comment || "N/A"}</td>
                     <td>{order.admin_comment || "N/A"}</td>

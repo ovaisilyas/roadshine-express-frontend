@@ -58,6 +58,7 @@ const Header = () => {
           {isAdmin && (
             <>
               <li onClick={() => navigate("/admin")}>Dashboard</li>
+              <li onClick={() => navigate("/admin/manage-companies")}>Manage Companies</li>
               <li onClick={() => navigate("/admin/manage-truck-companies")}>Manage Truck Companies</li>
               <li onClick={() => navigate("/admin/manage-trucks")}>Manage Trucks</li>
               <li onClick={() => navigate("/admin/manage-users")}>Manage Users</li>
