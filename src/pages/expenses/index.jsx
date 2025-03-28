@@ -99,7 +99,7 @@ const ExpensePage = ({ user, setUser }) => {
 
             // Convert image to Base64
             try {
-                const imageUrl = `http://localhost:5000/uploads/receipts/${expense.receipt}`;
+                const imageUrl = `https://www.roadshineexpress.com/uploads/receipts/${expense.receipt}`;
                 const base64Image = await convertImageToBase64(imageUrl);
 
                 doc.addImage(base64Image, "JPEG", 10, y + 10, 100, 60);
@@ -200,7 +200,7 @@ const ExpensePage = ({ user, setUser }) => {
                                     <td>
                                         {expense.receipt ? (
                                             <img
-                                                src={`http://localhost:5000/uploads/receipts/${expense.receipt}`}
+                                                src={`/uploads/receipts/${expense.receipt}`}
                                                 alt="Receipt"
                                                 className="receipt-thumbnail"
                                             />

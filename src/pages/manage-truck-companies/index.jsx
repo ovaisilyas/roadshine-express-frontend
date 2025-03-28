@@ -181,7 +181,7 @@ const ManageTruckCompanies = ({user, setUser}) => {
                                 <td>
                                 {truck.picture && (
                                     <img
-                                        src={`http://localhost:5000${truck.picture}`}
+                                        src={`${truck.picture}`}
                                         alt="Truck"
                                         width="100"
                                     />
